@@ -1,9 +1,7 @@
+import AppRoutes from '@presentation/routes/AppRoutes';
+
 function App() {
-  return (
-    <>
-      <h1>Deep Learn</h1>
-    </>
-  );
+  return <AppRoutes />;
 }
 
 export default App;
