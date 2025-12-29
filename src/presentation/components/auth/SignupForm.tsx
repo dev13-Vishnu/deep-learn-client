@@ -15,7 +15,7 @@ export default function SignupForm() {
         <input type="password" placeholder="Confirm Password" />
       </div>
 
-      <button className="primay-btn">Create Account</button>
+      <button className="primary-btn">Create Account</button>
 
       <div className="divider">Sign up with</div>
 
