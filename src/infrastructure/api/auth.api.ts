@@ -1,11 +1,13 @@
+import type { LoginDTO, RegisterDTO } from '../../application/dtos/auth';
 import apiClient from './axios';
-import { LoginDTO, RegisterDTO } from '@application/dtos/auth';
 
 export const authApi = {
-  login(data: LoginDTO) {
-    return apiClient.post('/auth/login', data);
+  async login(data: LoginDTO) {
+    const response = await apiClient.post('/auth/login', data);
+    return response.data;
   },
-  register(data: RegisterDTO) {
-    return apiClient.post('/auth/register', data);
+
+  async register(data: RegisterDTO) {
+    await apiClient.post('/auth/register', data);
   },
 };

@@ -1,4 +1,4 @@
-import { LoginDTO, RegisterDTO } from '@application/dtos/auth';
+import type { LoginDTO, RegisterDTO } from '../../dtos/auth';
 
 export interface AuthRepository {
   login(data: LoginDTO): Promise<void>;

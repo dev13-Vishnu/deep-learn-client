@@ -1,6 +1,6 @@
-import "../../styles/signup.css";
+import '../../styles/signup.css';
 
-import SignupForm from "../../components/auth/SignupForm";
+import SignupForm from '../../components/auth/SignupForm';
 
 export default function Signup() {
   return (
