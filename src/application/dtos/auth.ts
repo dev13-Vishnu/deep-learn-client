@@ -8,3 +8,12 @@ export interface RegisterDTO {
   password: string;
   role: 'student' | 'tutor';
 }
+
+export interface LoginResult {
+  accessToken: string;
+  user: {
+    id: string;
+    email: string;
+    role: 'student' | 'tutor';
+  };
+}

@@ -16,8 +16,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(Boolean(tokenStorage.get()));
 
   async function login(data: LoginDTO) {
-    const { token } = await authApi.login(data);
-    tokenStorage.set(token);
+    const { accessToken } = await authApi.login(data);
+    tokenStorage.set(accessToken);
     setIsAuthenticated(true);
   }
 

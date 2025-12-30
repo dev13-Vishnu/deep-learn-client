@@ -1,6 +1,6 @@
-import type { LoginDTO, RegisterDTO } from '../../dtos/auth';
+import type { LoginDTO, LoginResult, RegisterDTO } from '../../dtos/auth';
 
 export interface AuthRepository {
-  login(data: LoginDTO): Promise<void>;
+  login(data: LoginDTO): Promise<LoginResult>;
   register(data: RegisterDTO): Promise<void>;
 }
