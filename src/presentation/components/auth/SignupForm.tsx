@@ -28,7 +28,7 @@ export default function SignupForm() {
       });
 
       alert('Signup successful. You can now log in.');
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(err?.response?.data?.message || 'Signup failed');
     } finally {
       setLoading(false);

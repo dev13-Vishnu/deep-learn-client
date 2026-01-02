@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { useAuthContext } from '../../context/AuthContext';
+import { useAuth } from '../../hooks/useAuth';
 
 export default function LoginPage() {
-  const { login } = useAuthContext();
+  const { login } = useAuth();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -16,7 +16,7 @@ export default function LoginPage() {
 
     try {
       await login({ email, password });
-    } catch (err) {
+    } catch {
       setError('Invalid email or passwrod');
     } finally {
       setLoading(false);
