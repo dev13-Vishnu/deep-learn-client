@@ -38,5 +38,5 @@ export default tseslint.config(
       // General rules
       'no-console': 'warn',
     },
-  }
+  },
 );
