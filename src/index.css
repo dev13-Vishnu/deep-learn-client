@@ -60,8 +60,10 @@
     @apply text-xl;
   }
 
-  input {
-    @apply border border-[color:var(--color-border)] rounded-[var(--radius-md)];
+ input {
+    @apply w-full border border-[color:var(--color-border)]
+           rounded-[var(--radius-md)]
+           px-2 py-2 text-sm;
   }
 
   button {

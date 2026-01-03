@@ -35,25 +35,28 @@ export default function SignupForm() {
     }
   };
   return (
-    <form className="signup-form" onSubmit={handleSubmit}>
-      <h2>Create Your Account</h2>
+    <form onSubmit={handleSubmit} className="w-full max-w-[var(--container-sm)]">
+      <h2 className="mb-6">Create Your Account</h2>
 
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      <div className="row">
+      {error && <p className="mb-4 text-sm text-[color:var(--color-danger)]">{error}</p>}
+
+      <div className="mb-4 flex gap-3">
         <input type="text" placeholder="First Name" />
         <input type="text" placeholder="Last Name" />
       </div>
 
-      <input
-        type="email"
-        placeholder="Email ID"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        required
-      />
-      <input type="tel" placeholder="Phone Number" />
+      <div className="mb-4 flex gap-3">
+        <input
+          type="email"
+          placeholder="Email ID"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
+        <input type="tel" placeholder="Phone Number" />
+      </div>
 
-      <div className="row">
+      <div className="mb-4 flex gap-3">
         <input
           type="password"
           placeholder="Enter Password"
@@ -70,20 +73,33 @@ export default function SignupForm() {
         />
       </div>
 
-      <button className="primary-btn" type="submit" disabled={loading}>
+      <button
+        type="submit"
+        disabled={loading}
+        className="w-full bg-[color:var(--color-primary)] py-3 text-white disabled:opacity-60"
+      >
         {loading ? 'Creating ...' : 'Create Account'}
       </button>
 
-      <div className="divider">Sign up with</div>
+      <div className="my-5 text-center text-sm text-[color:var(--color-muted)]">Sign up with</div>
 
-      <div className="social-buttons">
-        <button type="button" className="social facebook">
+      <div className="flex gap-3">
+        <button
+          type="button"
+          className="flex-1 border border-[color:var(--color-border)] bg-white py-2"
+        >
           Facebook
         </button>
-        <button type="button" className="social google">
+        <button
+          type="button"
+          className="flex-1 border border-[color:var(--color-border)] bg-white py-2"
+        >
           Google
         </button>
-        <button type="button" className="social microsoft">
+        <button
+          type="button"
+          className="flex-1 border border-[color:var(--color-border)] bg-white py-2"
+        >
           Microsoft
         </button>
       </div>
