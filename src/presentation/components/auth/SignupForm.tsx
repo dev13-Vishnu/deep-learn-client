@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { authApi } from '../../../infrastructure/api/auth.api';
+import { useNavigate } from 'react-router-dom';
 
 export default function SignupForm() {
   const [email, setEmail] = useState('');
@@ -7,6 +8,8 @@ export default function SignupForm() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,7 +30,12 @@ export default function SignupForm() {
         role: 'student',
       });
 
-      alert('Signup successful. You can now log in.');
+      navigate('/verify-otp', {
+        state: {
+          email,
+          purpose: 'signup',
+        },
+      });
     } catch (err: unknown) {
       setError(err?.response?.data?.message || 'Signup failed');
     } finally {
@@ -80,6 +88,16 @@ export default function SignupForm() {
       >
         {loading ? 'Creating ...' : 'Create Account'}
       </button>
+
+        <div className="mt-4 text-center text-sm text-[color:var(--color-muted)]">
+        Already have an account?{' '}
+        <span
+          onClick={() => navigate('/login')}
+          className="cursor-pointer font-medium text-[color:var(--color-primary)]"
+        >
+          Login
+        </span>
+      </div>
 
       <div className="my-5 text-center text-sm text-[color:var(--color-muted)]">Sign up with</div>
 

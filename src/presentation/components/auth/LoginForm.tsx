@@ -63,7 +63,23 @@ export default function LoginForm() {
       </button>
 
       <div className="mt-3 text-sm text-[color:var(--color-muted)]">
-        Forgot password? <span className="cursor-pointer underline">Click here</span>
+        Forgot password?{' '}
+        <span
+          onClick={() => navigate('/forgot-password')}
+          className="cursor-pointer font-medium underline"
+        >
+          Click here
+        </span>
+      </div>
+
+      <div className="mt-4 text-center text-sm text-[color:var(--color-muted)]">
+        Don&apos;t have an account?{' '}
+        <span
+          onClick={() => navigate('/signup')}
+          className="cursor-pointer font-medium text-[color:var(--color-primary)]"
+        >
+          Sign up
+        </span>
       </div>
 
       <div className="my-5 text-center text-sm text-[color:var(--color-muted)]">Sign in with</div>

@@ -4,6 +4,7 @@ import Signup from '@presentation/pages/auth/Signup';
 import ProtectedRoute from './ProtectedRoute';
 import Login from '../pages/auth/Login';
 import OtpVerification from '../pages/auth/OtpVerification';
+import ForgotPassword from '../pages/auth/ForgotPassword';
 
 function DashboardPage() {
   return <h1> Protected Dashboard</h1>;
@@ -24,7 +25,7 @@ export default function AppRoutes() {
         }
       />
       <Route path="/verify-otp" element={<OtpVerification />} />
-
+      <Route path="/forgot-password" element={<ForgotPassword />} />
     </Routes>
   );
 }
