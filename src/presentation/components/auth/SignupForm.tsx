@@ -89,7 +89,7 @@ export default function SignupForm() {
         {loading ? 'Creating ...' : 'Create Account'}
       </button>
 
-        <div className="mt-4 text-center text-sm text-[color:var(--color-muted)]">
+      <div className="mt-4 text-center text-sm text-[color:var(--color-muted)]">
         Already have an account?{' '}
         <span
           onClick={() => navigate('/login')}
