@@ -1,4 +1,10 @@
-import type { LoginDTO, LoginResult, RegisterDTO } from '../../application/dtos/auth';
+import type {
+  LoginDTO,
+  LoginResult,
+  RegisterDTO,
+  RequestOtpDTO,
+  VerifyOtpSignupDTO,
+} from '../../application/dtos/auth';
 import apiClient from './axios';
 
 export const authApi = {
@@ -9,5 +15,16 @@ export const authApi = {
 
   async register(data: RegisterDTO): Promise<void> {
     await apiClient.post('/auth/register', data);
+  },
+
+  // ✅ NEW — request OTP (signup / forgot-password)
+  async requestOtp(data: RequestOtpDTO): Promise<{ expiresAt: string }> {
+    const response = await apiClient.post('/auth/request-otp', data);
+    return response.data;
+  },
+
+  // ✅ NEW — verify OTP + create user
+  async verifyOtpSignup(data: VerifyOtpSignupDTO): Promise<void> {
+    await apiClient.post('/auth/verify-otp-signup', data);
   },
 };

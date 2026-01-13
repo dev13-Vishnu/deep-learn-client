@@ -14,7 +14,7 @@ export default function SignupForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    setLoading(true);
+    // setLoading(true);
 
     if (password !== confirmPassword) {
       setError('Password do not match');
@@ -24,11 +24,19 @@ export default function SignupForm() {
     setLoading(true);
 
     try {
-      await authApi.register({
+      await authApi.requestOtp({
         email,
-        password,
-        role: 'student',
+        purpose: 'signup',
       });
+
+      sessionStorage.setItem(
+        'signupPayload',
+        JSON.stringify({
+          email,
+          password,
+          role: 'student',
+        }),
+      );
 
       navigate('/verify-otp', {
         state: {

@@ -1,17 +1,34 @@
 import { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { authApi } from '../../../infrastructure/api/auth.api';
 
-type OtpPurpose = 'signup' | 'forgot-password';
+export default function OtpVerificationForm() {
+  const navigate = useNavigate();
 
-interface Props {
-  email: string;
-  purpose: OtpPurpose;
-}
+  const [signupData, setSignupData] = useState<{
+    email: string;
+    password: string;
+    role: string;
+  } | null>(null);
 
-export default function OtpVerificationForm({ email, purpose }: Props) {
   const [otp, setOtp] = useState<string[]>(Array(6).fill(''));
   const [loading, setLoading] = useState(false);
   const [timer, setTimer] = useState(60);
+  const [error, setError] = useState<string | null>(null);
+
   const inputsRef = useRef<Array<HTMLInputElement | null>>([]);
+
+  // Load signup payload safely
+  useEffect(() => {
+    const storedPayload = sessionStorage.getItem('signupPayload');
+
+    if (!storedPayload) {
+      navigate('/signup');
+      return;
+    }
+
+    setSignupData(JSON.parse(storedPayload));
+  }, [navigate]);
 
   // Countdown timer
   useEffect(() => {
@@ -19,6 +36,12 @@ export default function OtpVerificationForm({ email, purpose }: Props) {
     const interval = setInterval(() => setTimer((t) => t - 1), 1000);
     return () => clearInterval(interval);
   }, [timer]);
+
+  if (!signupData) {
+    return null;
+  }
+
+  const { email, password, role } = signupData;
 
   const maskedEmail = email.replace(
     /^(.)(.*)(@.*)$/,
@@ -45,27 +68,35 @@ export default function OtpVerificationForm({ email, purpose }: Props) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
     setLoading(true);
 
-    // UI-only stub
-    setTimeout(() => {
+    try {
+      await authApi.verifyOtpSignup({
+        email,
+        otp: otp.join(''),
+        password,
+        role,
+      });
+
+      sessionStorage.removeItem('signupPayload');
+      navigate('/login');
+    } catch (err: any) {
+      setError(err?.response?.data?.message || 'OTP verification failed');
+    } finally {
       setLoading(false);
-      alert('OTP verified (stub)');
-    }, 1000);
+    }
   };
-
-  const heading = purpose === 'signup' ? 'Verify your email' : 'Verify to reset your password';
-
-  const description =
-    purpose === 'signup' ? 'Enter the 6-digit code sent to' : 'Enter the verification code sent to';
 
   return (
     <form onSubmit={handleSubmit} className="w-full max-w-[var(--container-sm)]">
-      <h2 className="mb-2">{heading}</h2>
+      <h2 className="mb-2">Verify your email</h2>
 
       <p className="mb-6 text-sm text-[color:var(--color-muted)]">
-        {description} <strong>{maskedEmail}</strong>
+        Enter the 6-digit code sent to <strong>{maskedEmail}</strong>
       </p>
+
+      {error && <p className="mb-4 text-sm text-[color:var(--color-danger)]">{error}</p>}
 
       <div className="mb-6 flex justify-between gap-2">
         {otp.map((digit, index) => (

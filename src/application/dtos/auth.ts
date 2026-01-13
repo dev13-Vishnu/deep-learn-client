@@ -17,3 +17,14 @@ export interface LoginResult {
     role: 'student' | 'tutor';
   };
 }
+export interface RequestOtpDTO {
+  email: string;
+  purpose: 'signup' | 'forgot-password';
+}
+
+export interface VerifyOtpSignupDTO {
+  email: string;
+  otp: string;
+  password: string;
+  role: string;
+}
