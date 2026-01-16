@@ -1,11 +1,11 @@
 import { Routes, Route } from 'react-router-dom';
-import RegisterPage from '@presentation/pages/auth/RegisterPage';
-import Signup from '@presentation/pages/auth/Signup';
 import ProtectedRoute from './ProtectedRoute';
 import Login from '../pages/auth/Login';
 import OtpVerification from '../pages/auth/OtpVerification';
 import ForgotPassword from '../pages/auth/ForgotPassword';
 import ResetPassword from '../pages/auth/ResetPassword';
+import RegisterPage from '../pages/auth/RegisterPage';
+import Signup from '../pages/auth/Signup';
 
 function DashboardPage() {
   return <h1> Protected Dashboard</h1>;
