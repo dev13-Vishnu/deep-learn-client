@@ -1,5 +1,5 @@
 import { Navigate, useLocation } from 'react-router-dom';
-import ResetPasswordForm from '../../components/auth/ResetPasswordForm';
+import ResetPasswordForm from '../components/ResetPasswordForm';
 
 interface ResetPasswordRouteState {
   email: string;

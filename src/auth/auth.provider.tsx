@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { AuthContext } from './AuthContext';
-import { tokenStorage } from '../../infrastructure/token.storage';
-import { authApi } from '../../infrastructure/api/auth.api';
-import type { LoginDTO, RegisterDTO } from '../../application/dtos/auth';
+import { AuthContext } from './auth.context';
+import { tokenStorage } from '../storage/token.storage';
+import { authApi } from '../api/auth.api';
+import type { LoginDTO, RegisterDTO } from '../application/dtos/auth';
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(Boolean(tokenStorage.get()));

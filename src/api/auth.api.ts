@@ -4,7 +4,7 @@ import type {
   RegisterDTO,
   RequestOtpDTO,
   VerifyOtpSignupDTO,
-} from '../../application/dtos/auth';
+} from '../application/dtos/auth';
 import apiClient from './axios';
 
 export const authApi = {

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { authApi } from '../../../infrastructure/api/auth.api';
+import { authApi } from '../../api/auth.api';
 import { useNavigate } from 'react-router-dom';
 
 export default function SignupForm() {

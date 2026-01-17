@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { authApi } from '../../../infrastructure/api/auth.api';
+import { authApi } from '../../api/auth.api';
 
 export default function OtpVerificationForm() {
   const navigate = useNavigate();

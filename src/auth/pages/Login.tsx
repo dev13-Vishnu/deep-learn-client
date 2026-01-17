@@ -1,16 +1,16 @@
-import ForgotPasswordForm from '../../components/auth/ForgotPasswordForm';
+import LoginForm from '../components/LoginForm';
 
-export default function ForgotPassword() {
+export default function Login() {
   return (
     <div className="flex h-screen w-full overflow-hidden bg-white">
       {/* Left form */}
       <div className="flex w-full items-center justify-center md:w-1/2">
-        <ForgotPasswordForm />
+        <LoginForm />
       </div>
 
-      {/* Right image */}
+      {/* Right image (hidden < md) */}
       <div className="hidden md:block md:w-1/2">
-        <img src="/signup.jpg" alt="" className="h-full w-full object-cover" />
+        <img src="/login.jpg" alt="" className="h-full w-full object-cover" />
       </div>
     </div>
   );

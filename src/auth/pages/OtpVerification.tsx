@@ -1,5 +1,5 @@
 import { useLocation, Navigate } from 'react-router-dom';
-import OtpVerificationForm from '../../components/auth/OtpVerificationForm';
+import OtpVerificationForm from '../components/OtpVerificationForm';
 
 type OtpPurpose = 'signup' | 'forgot-password';
 

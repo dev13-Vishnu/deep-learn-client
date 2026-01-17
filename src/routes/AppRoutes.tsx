@@ -1,11 +1,11 @@
 import { Routes, Route } from 'react-router-dom';
 import ProtectedRoute from './ProtectedRoute';
-import Login from '../pages/auth/Login';
-import OtpVerification from '../pages/auth/OtpVerification';
-import ForgotPassword from '../pages/auth/ForgotPassword';
-import ResetPassword from '../pages/auth/ResetPassword';
-import RegisterPage from '../pages/auth/RegisterPage';
-import Signup from '../pages/auth/Signup';
+import Login from '../auth/pages/Login';
+import OtpVerification from '../auth/pages/OtpVerification';
+import ForgotPassword from '../auth/pages/ForgotPassword';
+import ResetPassword from '../auth/pages/ResetPassword';
+import RegisterPage from '../auth/pages/RegisterPage';
+import Signup from '../auth/pages/Signup';
 
 function DashboardPage() {
   return <h1> Protected Dashboard</h1>;

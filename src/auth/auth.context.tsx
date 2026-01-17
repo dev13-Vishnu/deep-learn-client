@@ -1,5 +1,5 @@
 import { createContext } from 'react';
-import type { LoginDTO, RegisterDTO } from '../../application/dtos/auth';
+import type { LoginDTO, RegisterDTO } from '../application/dtos/auth';
 
 interface AuthContextValue {
   isAuthenticated: boolean;
