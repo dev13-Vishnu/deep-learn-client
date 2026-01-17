@@ -1,20 +1,27 @@
-import { useState } from 'react';
+import { useState, useEffect, type ReactNode } from 'react';
 import { AuthContext } from './auth.context';
-import { tokenStorage } from '../storage/token.storage';
 import { authApi } from '../api/auth.api';
-import type { LoginDTO, RegisterDTO } from '../application/dtos/auth';
+import { tokenStorage } from '../storage/token.storage';
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [isAuthenticated, setIsAuthenticated] = useState(Boolean(tokenStorage.get()));
+interface AuthProviderProps {
+  children: ReactNode;
+}
 
-  async function login(data: LoginDTO) {
-    const { accessToken } = await authApi.login(data);
+export function AuthProvider({ children }: AuthProviderProps) {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  // Restore auth state on app load
+  useEffect(() => {
+    setIsAuthenticated(Boolean(tokenStorage.get()));
+  }, []);
+
+  async function login(email: string, password: string) {
+    const response = await authApi.login({ email, password });
+
+    const { accessToken } = response.data;
+
     tokenStorage.set(accessToken);
     setIsAuthenticated(true);
-  }
-
-  async function register(data: RegisterDTO) {
-    await authApi.register(data);
   }
 
   function logout() {
@@ -23,7 +30,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, login, register, logout }}>
+    <AuthContext.Provider
+      value={{
+        isAuthenticated,
+        login,
+        logout,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

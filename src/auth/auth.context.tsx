@@ -1,11 +1,10 @@
 import { createContext } from 'react';
-import type { LoginDTO, RegisterDTO } from '../application/dtos/auth';
 
-interface AuthContextValue {
+export interface AuthContextValue {
+  user: any | null;
   isAuthenticated: boolean;
-  login(data: LoginDTO): Promise<void>;
-  register(data: RegisterDTO): Promise<void>;
-  logout(): void;
+  login: (email: string, password: string) => Promise<void>;
+  logout: () => void;
 }
 
 export const AuthContext = createContext<AuthContextValue | null>(null);

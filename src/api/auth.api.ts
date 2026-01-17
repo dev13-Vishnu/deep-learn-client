@@ -1,30 +1,28 @@
-import type {
-  LoginDTO,
-  LoginResult,
-  RegisterDTO,
-  RequestOtpDTO,
-  VerifyOtpSignupDTO,
-} from '../application/dtos/auth';
 import apiClient from './axios';
 
 export const authApi = {
-  async login(data: LoginDTO): Promise<LoginResult> {
-    const response = await apiClient.post<LoginResult>('/auth/login', data);
-    return response.data;
+  login(data: { email: string; password: string }) {
+    return apiClient.post('/auth/login', data);
   },
 
-  async register(data: RegisterDTO): Promise<void> {
-    await apiClient.post('/auth/register', data);
+  requestOtp(data: { email: string; purpose: 'signup' | 'forgot-password' }) {
+    return apiClient.post('/auth/request-otp', data);
   },
 
-  // ✅ NEW — request OTP (signup / forgot-password)
-  async requestOtp(data: RequestOtpDTO): Promise<{ expiresAt: string }> {
-    const response = await apiClient.post('/auth/request-otp', data);
-    return response.data;
+  verifyOtpSignup(data: {
+    email: string;
+    otp: string;
+    password: string;
+    role: string;
+  }) {
+    return apiClient.post('/auth/verify-otp-signup', data);
   },
 
-  // ✅ NEW — verify OTP + create user
-  async verifyOtpSignup(data: VerifyOtpSignupDTO): Promise<void> {
-    await apiClient.post('/auth/verify-otp-signup', data);
+  resetPassword(data: {
+    email: string;
+    otp: string;
+    newPassword: string;
+  }) {
+    return apiClient.post('/auth/reset-password', data);
   },
 };
