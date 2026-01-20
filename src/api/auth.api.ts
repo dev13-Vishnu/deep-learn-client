@@ -1,3 +1,4 @@
+import type { sign } from 'crypto';
 import apiClient from './axios';
 
 export const authApi = {
@@ -9,13 +10,12 @@ export const authApi = {
     return apiClient.post('/auth/request-otp', data);
   },
 
-  verifyOtpSignup(data: {
+  signup(data: {
     email: string;
     otp: string;
     password: string;
-    role: string;
   }) {
-    return apiClient.post('/auth/verify-otp-signup', data);
+    return apiClient.post('/auth/signup', data);
   },
 
   resetPassword(data: {
