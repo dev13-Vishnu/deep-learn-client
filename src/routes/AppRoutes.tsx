@@ -4,7 +4,6 @@ import Login from '../auth/pages/Login';
 import OtpVerification from '../auth/pages/OtpVerification';
 import ForgotPassword from '../auth/pages/ForgotPassword';
 import ResetPassword from '../auth/pages/ResetPassword';
-import RegisterPage from '../auth/pages/RegisterPage';
 import Signup from '../auth/pages/Signup';
 import GuestRoute from './GuestRoute';
 

@@ -21,7 +21,7 @@ export default function OtpVerification() {
     <div className="flex h-screen w-full overflow-hidden bg-white">
       {/* Left form */}
       <div className="flex w-full items-center justify-center md:w-1/2">
-        <OtpVerificationForm email={state.email} purpose={state.purpose} />
+        <OtpVerificationForm />
       </div>
 
       {/* Right image */}

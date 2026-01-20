@@ -43,9 +43,10 @@ export default function SignupForm() {
           purpose: 'signup',
         },
       });
-    } catch (err: unknown) {
+    } catch (err: any) {
       setError(err?.response?.data?.message || 'Signup failed');
-    } finally {
+    }
+ finally {
       setLoading(false);
     }
   };

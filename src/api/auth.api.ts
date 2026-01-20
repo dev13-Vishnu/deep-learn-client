@@ -1,4 +1,3 @@
-import type { sign } from 'crypto';
 import apiClient from './axios';
 
 export const authApi = {

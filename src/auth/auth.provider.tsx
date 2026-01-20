@@ -1,4 +1,4 @@
-import { useState, useEffect, type ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { AuthContext } from './auth.context';
 import { authApi } from '../api/auth.api';
 import { tokenStorage } from '../storage/token.storage';
@@ -32,6 +32,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   return (
     <AuthContext.Provider
       value={{
+        user:null,
         isAuthenticated,
         login,
         logout,
