@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authApi } from '../../api/auth.api';
+import { tokenStorage } from '../../storage/token.storage';
 
 export default function OtpVerificationForm() {
   const navigate = useNavigate();
@@ -72,15 +73,16 @@ export default function OtpVerificationForm() {
     setLoading(true);
 
     try {
-      await authApi.verifyOtpSignup({
+      const response = await authApi.signup({
         email,
         otp: otp.join(''),
         password,
-        role,
       });
 
-      sessionStorage.removeItem('signupPayload');
-      navigate('/login');
+      const { accessToken } = response.data;
+      tokenStorage.set(accessToken);
+      navigate('/dashboard', { replace: true });
+
     } catch (err: any) {
       setError(err?.response?.data?.message || 'OTP verification failed');
     } finally {
