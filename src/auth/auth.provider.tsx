@@ -23,6 +23,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
     tokenStorage.set(accessToken);
     setIsAuthenticated(true);
   }
+  function authenticateWithToken(token: string) {
+  tokenStorage.set(token);
+  setIsAuthenticated(true);
+}
+
 
   function logout() {
     tokenStorage.clear();
@@ -35,7 +40,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
         user:null,
         isAuthenticated,
         login,
-        logout,
+        authenticateWithToken,
+        logout
       }}
     >
       {children}
