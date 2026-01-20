@@ -34,7 +34,6 @@ export default function SignupForm() {
         JSON.stringify({
           email,
           password,
-          role: 'student',
         }),
       );
 
