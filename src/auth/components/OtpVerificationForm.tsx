@@ -42,7 +42,7 @@ export default function OtpVerificationForm() {
     return null;
   }
 
-  const { email, password, role } = signupData;
+  const { email, password } = signupData;
 
   const maskedEmail = email.replace(
     /^(.)(.*)(@.*)$/,

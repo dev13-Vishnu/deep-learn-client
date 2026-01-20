@@ -6,6 +6,7 @@ import ForgotPassword from '../auth/pages/ForgotPassword';
 import ResetPassword from '../auth/pages/ResetPassword';
 import RegisterPage from '../auth/pages/RegisterPage';
 import Signup from '../auth/pages/Signup';
+import GuestRoute from './GuestRoute';
 
 function DashboardPage() {
   return <h1> Protected Dashboard</h1>;
@@ -14,9 +15,32 @@ function DashboardPage() {
 export default function AppRoutes() {
   return (
     <Routes>
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<RegisterPage />} />
-      <Route path="/signup" element={<Signup />} />
+      <Route
+  path="/login"
+  element={
+    <GuestRoute>
+      <Login />
+    </GuestRoute>
+  }
+/>
+
+<Route
+  path="/signup"
+  element={
+    <GuestRoute>
+      <Signup />
+    </GuestRoute>
+  }
+/>
+
+<Route
+  path="/forgot-password"
+  element={
+    <GuestRoute>
+      <ForgotPassword />
+    </GuestRoute>
+  }
+/>
       <Route
         path="/dashboard"
         element={
@@ -26,7 +50,6 @@ export default function AppRoutes() {
         }
       />
       <Route path="/verify-otp" element={<OtpVerification />} />
-      <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
     </Routes>
   );

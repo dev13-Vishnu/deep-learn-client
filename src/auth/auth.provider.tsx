@@ -8,12 +8,12 @@ interface AuthProviderProps {
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(Boolean(tokenStorage.get()));
 
   // Restore auth state on app load
-  useEffect(() => {
-    setIsAuthenticated(Boolean(tokenStorage.get()));
-  }, []);
+  // useEffect(() => {
+  //   setIsAuthenticated(Boolean(tokenStorage.get()));
+  // }, []);
 
   async function login(email: string, password: string) {
     const response = await authApi.login({ email, password });
