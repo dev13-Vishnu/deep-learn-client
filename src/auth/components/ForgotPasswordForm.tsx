@@ -1,19 +1,31 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { authApi } from '../../api/auth.api';
 
 export default function ForgotPasswordForm() {
   const [email, setEmail] = useState('');
-  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
+    setError(null);
+    setMessage(null);
 
-    navigate('/verify-otp', {
-      state: {
-        email,
-        purpose: 'forgot-password',
-      },
-    });
+    try {
+      await authApi.requestPasswordResetOtp({ email });
+
+      // Generic success message (no user enumeration)
+      setMessage('If the email exists, a verification code has been sent.');
+    } catch (err: any) {
+      setError(
+        err?.response?.data?.message ||
+          'Something went wrong. Please try again.'
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -32,12 +44,29 @@ export default function ForgotPasswordForm() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
+          disabled={loading}
         />
       </div>
 
-      <button type="submit" className="w-full bg-[color:var(--color-primary)] py-3 text-white">
-        Send verification code
+      <button
+        type="submit"
+        disabled={loading}
+        className="w-full bg-[color:var(--color-primary)] py-3 text-white"
+      >
+        {loading ? 'Sending…' : 'Send verification code'}
       </button>
+
+      {message && (
+        <p className="mt-4 text-sm text-green-600">
+          {message}
+        </p>
+      )}
+
+      {error && (
+        <p className="mt-4 text-sm text-red-600">
+          {error}
+        </p>
+      )}
     </form>
   );
 }
