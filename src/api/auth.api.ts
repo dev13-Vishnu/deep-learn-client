@@ -17,13 +17,13 @@ export const authApi = {
     return apiClient.post('/auth/signup', data);
   },
 
-  resetPassword(data: {
-    email: string;
-    otp: string;
-    newPassword: string;
-  }) {
-    return apiClient.post('/auth/reset-password', data);
-  },
+  // resetPassword(data: {
+  //   email: string;
+  //   otp: string;
+  //   newPassword: string;
+  // }) {
+  //   return apiClient.post('/auth/reset-password', data);
+  // },
 
   requestPasswordResetOtp(data: { email: string }) {
   return apiClient.post(
@@ -31,5 +31,21 @@ export const authApi = {
     data
   );
 },
+
+verifyPasswordResetOtp(data: { email: string; otp: string }) {
+  return apiClient.post(
+    '/auth/forgot-password/verify-otp',
+    data
+  );
+},
+
+resetPassword(data: { email: string; password: string }) {
+  return apiClient.post(
+    '/auth/forgot-password/reset',
+    data
+  );
+},
+
+
 
 };

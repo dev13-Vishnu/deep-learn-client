@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { authApi } from '../../api/auth.api';
 import { useAuth } from '../useAuth';
 
@@ -21,17 +21,57 @@ export default function OtpVerificationForm() {
 
   const inputsRef = useRef<Array<HTMLInputElement | null>>([]);
 
+  const location = useLocation();
+
+  const purpose : 'signup' | 'forgot-password' | undefined = location.state?.purpose
+
   // Load signup payload safely
+  // useEffect(() => {
+  //   const storedPayload = sessionStorage.getItem('signupPayload');
+
+  //   if (!storedPayload) {
+  //     navigate('/signup');
+  //     return;
+  //   }
+
+  //   setSignupData(JSON.parse(storedPayload));
+  // }, [navigate]);
   useEffect(() => {
+  // SIGNUP FLOW (existing behavior)
+  if (purpose === 'signup') {
     const storedPayload = sessionStorage.getItem('signupPayload');
 
     if (!storedPayload) {
-      navigate('/signup');
+      navigate('/signup', { replace: true });
       return;
     }
 
     setSignupData(JSON.parse(storedPayload));
-  }, [navigate]);
+    return;
+  }
+
+  // FORGOT-PASSWORD FLOW (NEW)
+  if (purpose === 'forgot-password') {
+    const emailFromState = location.state?.email;
+
+    if (!emailFromState) {
+      navigate('/forgot-password', { replace: true });
+      return;
+    }
+
+    // Fake minimal signupData shape so rendering & masking still work
+    setSignupData({
+      email: emailFromState,
+      password: '', // not used
+      role: '',
+    });
+    return;
+  }
+
+  // INVALID ENTRY
+  navigate('/login', { replace: true });
+}, [purpose, location.state, navigate]);
+
 
   // Countdown timer
   useEffect(() => {
@@ -75,15 +115,43 @@ export default function OtpVerificationForm() {
     setLoading(true);
 
     try {
-      const response = await authApi.signup({
-        email,
-        otp: otp.join(''),
-        password,
-      });
+//       const response = await authApi.signup({
+//         email,
+//         otp: otp.join(''),
+//         password,
+//       });
 
-      const { accessToken } = response.data;
-      authenticateWithToken(accessToken);
-navigate('/dashboard', { replace: true });
+//       const { accessToken } = response.data;
+//       authenticateWithToken(accessToken);
+// navigate('/dashboard', { replace: true });
+
+if (purpose === 'signup') {
+  const response = await authApi.signup({
+    email,
+    otp: otp.join(''),
+    password,
+  });
+
+  const { accessToken } = response.data;
+  authenticateWithToken(accessToken);
+
+  navigate('/dashboard', { replace: true });
+  return;
+}
+
+if (purpose === 'forgot-password') {
+  await authApi.verifyPasswordResetOtp({
+    email,
+    otp: otp.join(''),
+  });
+
+  navigate('/reset-password', {
+    state: { email },
+    replace: true,
+  });
+  return;
+}
+
 
 
     } catch (err: any) {

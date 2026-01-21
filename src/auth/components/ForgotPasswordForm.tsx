@@ -1,11 +1,14 @@
 import { useState } from 'react';
 import { authApi } from '../../api/auth.api';
+import { useNavigate } from 'react-router-dom';
 
 export default function ForgotPasswordForm() {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -18,6 +21,13 @@ export default function ForgotPasswordForm() {
 
       // Generic success message (no user enumeration)
       setMessage('If the email exists, a verification code has been sent.');
+      navigate('/verify-otp', {
+  state: {
+    email,
+    purpose: 'forgot-password',
+  },
+});
+
     } catch (err: any) {
       setError(
         err?.response?.data?.message ||

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { authApi } from '../../api/auth.api';
 
 interface Props {
   email: string;
@@ -17,6 +18,7 @@ export default function ResetPasswordForm({ email }: Props) {
     e.preventDefault();
     setError(null);
 
+
     if (password !== confirmPassword) {
       setError('Passwords do not match');
       return;
@@ -24,11 +26,21 @@ export default function ResetPasswordForm({ email }: Props) {
 
     setLoading(true);
 
-    // UI-only stub
-    setTimeout(() => {
+    try {
+      await authApi.resetPassword({
+        email, password,
+      });
+
+      navigate('/login',{replace: true});
+    } catch (error: any) {
+      setError(
+        error?.response?.data?.message || 
+        'Failed to reset password'
+      );
+    } finally {
       setLoading(false);
-      navigate('/login', { replace: true });
-    }, 1000);
+    }
+    
   };
 
   return (
