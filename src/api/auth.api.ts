@@ -46,6 +46,10 @@ resetPassword(data: { email: string; password: string }) {
   );
 },
 
+me() {
+  return apiClient.get('/auth/me');
+}
+
 
 
 };
