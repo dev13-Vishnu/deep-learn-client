@@ -8,61 +8,59 @@ interface AuthProviderProps {
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
-  const [user, setUser] = useState<any | null> (null);
-  const [isAuthenticated, setIsAuthenticated] = useState(Boolean(tokenStorage.get()));
+  const [user, setUser] = useState<any | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isHydrating, setIsHydrating] = useState(true);
 
-  useEffect(()=> {
-    const hydrate  = async () => {
-      const token  = tokenStorage.get();
+  useEffect(() => {
+    const hydrate = async () => {
+      const token = tokenStorage.get();
 
-      if(!token) {
+      if (!token) {
         setIsHydrating(false);
         return;
       }
 
       try {
         const res = await authApi.me();
-        setUser(res.data.use);
+        setUser(res.data.user);
         setIsAuthenticated(true);
       } catch (err: any) {
-        if(err?.response?.status !== 401){
+        if (err?.response?.status !== 401) {
           console.error(err);
         }
         tokenStorage.clear();
         setUser(null);
         setIsAuthenticated(false);
-      } finally{
-        setIsAuthenticated(false);
+      } finally {
+        setIsHydrating(false);
       }
     };
+
     hydrate();
-  },[]);
-
-
-  
-
-  // Restore auth state on app load
-  // useEffect(() => {
-  //   setIsAuthenticated(Boolean(tokenStorage.get()));
-  // }, []);
+  }, []);
 
   async function login(email: string, password: string) {
     const response = await authApi.login({ email, password });
-
-    const { accessToken } = response.data;
+    const { accessToken, user } = response.data;
 
     tokenStorage.set(accessToken);
-    setUser(response.data.user)
+    setUser(user);
     setIsAuthenticated(true);
   }
+
   function authenticateWithToken(token: string) {
-  tokenStorage.set(token);
-  setIsAuthenticated(true);
-}
+    tokenStorage.set(token);
+    setIsAuthenticated(true);
+  }
 
+  async function logout() {
+    try {
+      await authApi.logout();
+    } catch {
+      // ignore network errors on logout
+    }
 
-  function logout() {
     tokenStorage.clear();
     setUser(null);
     setIsAuthenticated(false);
@@ -71,12 +69,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
   return (
     <AuthContext.Provider
       value={{
-        user:null,
+        user,
         isAuthenticated,
         isHydrating,
         login,
         authenticateWithToken,
-        logout
+        logout,
       }}
     >
       {children}
