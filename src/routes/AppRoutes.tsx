@@ -9,6 +9,8 @@ import Signup from '../auth/pages/Signup';
 import ForgotPassword from '../auth/pages/ForgotPassword';
 import OtpVerification from '../auth/pages/OtpVerification';
 import ResetPassword from '../auth/pages/ResetPassword';
+import LandingPage from '../pages/landing/LandingPage';
+import HomePage from '../pages/home/HomePage';
 
 function DashboardPage() {
   return <h1> Protected Dashboard</h1>;
@@ -47,11 +49,12 @@ export default function AppRoutes() {
       <Route path="/reset-password" element={<ResetPassword />} />
 
 <Route element = {<AppLayout/>}>
+  <Route path='/' element= {<LandingPage/>}/>
   <Route
     path="/dashboard"
       element={
         <ProtectedRoute>
-          <DashboardPage />
+          <HomePage/>
         </ProtectedRoute>
       }
   />
