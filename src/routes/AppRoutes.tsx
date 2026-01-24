@@ -11,10 +11,11 @@ import OtpVerification from '../auth/pages/OtpVerification';
 import ResetPassword from '../auth/pages/ResetPassword';
 import LandingPage from '../pages/landing/LandingPage';
 import HomePage from '../pages/home/HomePage';
+import DashboardHome from '../pages/dashboard/DashboardHome';
 
-function DashboardPage() {
-  return <h1> Protected Dashboard</h1>;
-}
+// function DashboardPage() {
+//   return <h1> Protected Dashboard</h1>;
+// }
 
 export default function AppRoutes() {
   return (
@@ -54,7 +55,7 @@ export default function AppRoutes() {
     path="/dashboard"
       element={
         <ProtectedRoute>
-          <HomePage/>
+          <DashboardHome/>
         </ProtectedRoute>
       }
   />
