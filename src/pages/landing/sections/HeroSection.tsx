@@ -4,7 +4,7 @@ export default function HeroSection () {
     const navigate = useNavigate();
     
     return (
-        <section className="mx-auto max-w-7xl px-6 py-16 grid md:grid-cols-2 gap-10">
+        <section className="mx-auto max-w-7xl px-6 py-12 grid md:grid-cols-2 gap-10">
             <div>
                 <h1 className="mx-auto max-w-7xl px-6 py-16 grid md:grid-cols-2 gap-10">
                     Unlock Your Potential <br/> with Deep Learn
@@ -21,9 +21,14 @@ export default function HeroSection () {
                     Select Your Plan
                 </button>
             </div>
-            <div>
-                <img src="/hero.png" alt="Learning illustration" className="w-full" />
+            <div className="hidden md:block">
+                <img
+                    src="/hero.png"
+                    alt="Learning illustration"
+                    className="w-full"
+                />
             </div>
+
         </section>
     )
 }

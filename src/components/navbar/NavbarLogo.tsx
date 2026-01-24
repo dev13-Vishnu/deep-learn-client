@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import logo from '/logo.png'
 
 export default function NavbarLogo () {
     const navigate = useNavigate();
@@ -8,7 +9,11 @@ export default function NavbarLogo () {
             onClick={()=>navigate('/')}
             className = "text-lg font-semibold"
         >
-            Deep Learn  
+            <img
+        src={logo}
+        alt="DeepLearn"
+        className="h-8 w-auto"
+      /> 
         </button>
     )
 }

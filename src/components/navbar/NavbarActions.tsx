@@ -19,13 +19,13 @@ export default function NavbarActions ({
             <div className="flex items-center gap-3">
                 <button
                     onClick={()=> navigate('login')}
-                    className="text-sm"
+                    className="rounded-md border px-4 py-2 text-sm"
                 >
                     Login
                 </button>
                 <button
                     onClick={() => navigate('/signup')}
-                    className="rounded-md bg-[color:var(--color-primary)] px-4 py-2 text-sm text-whilte"
+                    className="rounded-md bg-[color:var(--color-primary)] px-4 py-2 text-sm text-white"
                 >
                     Sign up
                 </button>
