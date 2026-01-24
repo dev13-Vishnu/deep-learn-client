@@ -1,6 +1,7 @@
 import CategoriesSection from "./sections/CategoriesSection";
 import HeroSection from "./sections/HeroSection";
 import StatsSection from "./sections/StatsSection";
+import TopCoursesSection from "./sections/TopCoursesSection";
 
 export default function LandingPage() {
     return (
@@ -8,6 +9,7 @@ export default function LandingPage() {
             <HeroSection/>
             <StatsSection/>
             <CategoriesSection/>
+            <TopCoursesSection/>
         </div>
     )
 }
