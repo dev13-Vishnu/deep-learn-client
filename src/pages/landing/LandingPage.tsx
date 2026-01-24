@@ -2,6 +2,7 @@ import CategoriesSection from "./sections/CategoriesSection";
 import HeroSection from "./sections/HeroSection";
 import InstructorsSection from "./sections/InstructorsSection";
 import StatsSection from "./sections/StatsSection";
+import TestimonialsSection from "./sections/TestimonialsSection";
 import TopCoursesSection from "./sections/TopCoursesSection";
 
 export default function LandingPage() {
@@ -12,6 +13,7 @@ export default function LandingPage() {
             <CategoriesSection/>
             <TopCoursesSection/>
             <InstructorsSection/>
+            <TestimonialsSection/>
         </div>
     )
 }
