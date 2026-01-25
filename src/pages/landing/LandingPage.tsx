@@ -1,3 +1,4 @@
+import BecomeInstructorSection from "./sections/BecomeInstructorSection";
 import CategoriesSection from "./sections/CategoriesSection";
 import HeroSection from "./sections/HeroSection";
 import InstructorsSection from "./sections/InstructorsSection";
@@ -14,6 +15,7 @@ export default function LandingPage() {
             <TopCoursesSection/>
             <InstructorsSection/>
             <TestimonialsSection/>
+            <BecomeInstructorSection/>
         </div>
     )
 }

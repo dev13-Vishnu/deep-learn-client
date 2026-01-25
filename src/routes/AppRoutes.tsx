@@ -12,6 +12,7 @@ import ResetPassword from '../auth/pages/ResetPassword';
 import LandingPage from '../pages/landing/LandingPage';
 import HomePage from '../pages/home/HomePage';
 import DashboardHome from '../pages/dashboard/DashboardHome';
+import InstructorApplyPage from '../pages/instructor/InstructorApplyPage';
 
 // function DashboardPage() {
 //   return <h1> Protected Dashboard</h1>;
@@ -59,6 +60,15 @@ export default function AppRoutes() {
         </ProtectedRoute>
       }
   />
+  <Route
+    path="/instructor/apply"
+    element={
+      <ProtectedRoute>
+        <InstructorApplyPage />
+      </ProtectedRoute>
+    }
+  />
+  
 </Route>
   
     </Routes>
