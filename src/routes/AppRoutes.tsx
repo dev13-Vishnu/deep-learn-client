@@ -13,6 +13,8 @@ import LandingPage from '../pages/landing/LandingPage';
 import HomePage from '../pages/home/HomePage';
 import DashboardHome from '../pages/dashboard/DashboardHome';
 import InstructorApplyPage from '../pages/instructor/InstructorApplyPage';
+import InstructorStatusPage from '../pages/instructor/InstructorStatusPage';
+import InstructorDashboardPage from '../pages/instructor/InstructorDashboardPage';
 
 // function DashboardPage() {
 //   return <h1> Protected Dashboard</h1>;
@@ -68,6 +70,24 @@ export default function AppRoutes() {
       </ProtectedRoute>
     }
   />
+  <Route
+  path="/instructor/status"
+  element={
+    <ProtectedRoute>
+      <InstructorStatusPage />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/instructor/dashboard"
+  element={
+    <ProtectedRoute>
+      <InstructorDashboardPage />
+    </ProtectedRoute>
+  }
+/>
+
   
 </Route>
   
