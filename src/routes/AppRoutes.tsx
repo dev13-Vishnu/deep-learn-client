@@ -10,11 +10,13 @@ import ForgotPassword from '../auth/pages/ForgotPassword';
 import OtpVerification from '../auth/pages/OtpVerification';
 import ResetPassword from '../auth/pages/ResetPassword';
 import LandingPage from '../pages/landing/LandingPage';
-import HomePage from '../pages/home/HomePage';
 import DashboardHome from '../pages/dashboard/DashboardHome';
 import InstructorApplyPage from '../pages/instructor/InstructorApplyPage';
 import InstructorStatusPage from '../pages/instructor/InstructorStatusPage';
 import InstructorDashboardPage from '../pages/instructor/InstructorDashboardPage';
+import AdminLoginPage from '../pages/admin/AdminLoginPage';
+import AdminRoute from './AdminRoute';
+import AdminDashboardPage from '../pages/admin/AdminDashBoardPage';
 
 // function DashboardPage() {
 //   return <h1> Protected Dashboard</h1>;
@@ -85,6 +87,20 @@ export default function AppRoutes() {
     <ProtectedRoute>
       <InstructorDashboardPage />
     </ProtectedRoute>
+  }
+/>
+
+
+//admin
+
+<Route path="/admin/login" element={<AdminLoginPage />} />
+
+<Route
+  path="/admin"
+  element={
+    <AdminRoute>
+      <AdminDashboardPage />
+    </AdminRoute>
   }
 />
 

@@ -5,7 +5,7 @@ import { getInstructorStatus } from '../../api/instructor.api';
 type InstructorStatus = 'pending' | 'rejected' | 'approved';
 
 // 🔧 MOCK — change this to test states
-const MOCK_STATUS: InstructorStatus = 'pending';
+// const MOCK_STATUS: InstructorStatus = 'pending';
 
 export default function InstructorStatusPage() {
   const navigate = useNavigate();

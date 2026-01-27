@@ -5,14 +5,25 @@ import { applyForInstructor } from '../../../api/instructor.api';
 export default function InstructorApplicationForm() {
   const navigate = useNavigate();
 
+  type FormState = {
+  bio: string;
+  experienceYears: string;
+  teachingExperience: 'yes' | 'no';
+  courseIntent: string;
+  level: 'beginner' | 'intermediate' | 'advanced';
+  language: string;
+  agreed: boolean;
+};
+
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<FormState>({
     bio: '',
     experienceYears: '',
-    teachingExperience: '',
+    teachingExperience: 'yes',
     courseIntent: '',
-    level: '',
+    level: 'beginner',
     language: '',
     agreed: false,
   });
@@ -80,7 +91,12 @@ export default function InstructorApplicationForm() {
           <select
             className="rounded-md border p-2 text-sm"
             value={form.teachingExperience}
-            onChange={(e) => update('teachingExperience', e.target.value)}
+            onChange={(e) =>
+            update(
+              'teachingExperience',
+              e.target.value as 'yes' | 'no'
+            )
+          }
             required
           >
             <option value="">Have you taught before?</option>
@@ -106,7 +122,15 @@ export default function InstructorApplicationForm() {
           <select
             className="rounded-md border p-2 text-sm"
             value={form.level}
-            onChange={(e) => update('level', e.target.value)}
+            onChange={(e) =>
+            update(
+              'level',
+              e.target.value as
+                | 'beginner'
+                | 'intermediate'
+                | 'advanced'
+            )
+          }
             required
           >
             <option value="">Course level</option>
