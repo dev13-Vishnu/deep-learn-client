@@ -1,9 +1,12 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { applyForInstructor } from '../../../api/instructor.api';
 
 export default function InstructorApplicationForm() {
   const navigate = useNavigate();
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState({
     bio: '',
     experienceYears: '',
@@ -21,11 +24,24 @@ export default function InstructorApplicationForm() {
     setForm((prev) => ({ ...prev, [key]: value }));
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setError(null);
+    setIsSubmitting(true);
 
-    // UI-only submit
-    navigate('/instructor/status');
+    try {
+        await applyForInstructor(form);
+        // UI-only submit
+        navigate('/instructor/status');
+        
+    } catch (error: any) {
+        setError(
+            error?.response?.data?.message?? 'Something went wrong. Please try again.'
+        );
+    } finally {
+        setIsSubmitting(false);
+    }
+
   }
 
   return (
@@ -120,12 +136,21 @@ export default function InstructorApplicationForm() {
         I agree to maintain course quality and follow platform guidelines.
       </label>
 
-      <button
-        type="submit"
-        className="self-start rounded-md bg-[color:var(--color-primary)] px-6 py-2 text-sm text-white"
-      >
-        Submit application
-      </button>
+      {error && (
+  <p className="text-sm text-red-600">
+    {error}
+  </p>
+)}
+
+
+     <button
+  type="submit"
+  disabled={isSubmitting}
+  className="self-start rounded-md bg-[color:var(--color-primary)] px-6 py-2 text-sm text-white disabled:opacity-60"
+>
+  {isSubmitting ? 'Submitting…' : 'Submit application'}
+</button>
+
     </form>
   );
 }
