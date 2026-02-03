@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 
 import ProtectedRoute from './ProtectedRoute';
 import GuestRoute from './GuestRoute';
@@ -22,73 +22,9 @@ import InstructorDashboardPage from '../pages/instructor/InstructorDashboardPage
 import AdminLoginPage from '../pages/admin/AdminLoginPage';
 import AdminDashboardPage from '../pages/admin/AdminDashBoardPage';
 
-import { useAuth } from '../auth/useAuth';
-import type { JSX } from 'react';
+import { RequireInstructorState, RequireRole} from '../auth/guards';
 
-/* ------------------------------------------------
-   Helpers
------------------------------------------------- */
 
-type InstructorState = 
-| 'not_applied'
-| 'pending'
-| 'approved'
-| 'rejected' ;
-
-function getInstructorState(user: any): InstructorState {
-  if(!user?.instructorApplication) return 'not_applied';
-
-  return user.instructorApplication.status;
-}
-
-/* ---------------------------------------
-   Role Guard (local to routes for now)
----------------------------------------- */
-
-function RequireRole({
-  allowed,
-  children,
-}: {
-  allowed: Array<'student' | 'instructor' | 'admin'>;
-  children: JSX.Element;
-}) {
-  const { currentRole, isHydrating } = useAuth();
-
-  if (isHydrating) return null;
-
-  if (!currentRole || !allowed.includes(currentRole)) {
-    return <Navigate to="/login" replace />;
-  }
-
-  return children;
-}
-
-function RequireInstructorState({
-  allowed,
-  children,
-}: {
-  allowed: InstructorState[];
-  children: JSX.Element;
-}) {
-  const { user, isHydrating } = useAuth();
-
-  if (isHydrating)  return null;
-
-  const state = getInstructorState(user);
-
-  if(!allowed.includes(state)) {
-    if(state === 'approved') {
-      return <Navigate to="/login" replace />;
-    }
-
-    return <Navigate to="/instructor/status" replace/>;
-  }
-  return children;
-}
-
-/* ---------------------------------------
-   Routes
----------------------------------------- */
 
 export default function AppRoutes() {
   return (
