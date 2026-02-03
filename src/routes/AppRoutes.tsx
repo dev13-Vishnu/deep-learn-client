@@ -25,6 +25,22 @@ import AdminDashboardPage from '../pages/admin/AdminDashBoardPage';
 import { useAuth } from '../auth/useAuth';
 import type { JSX } from 'react';
 
+/* ------------------------------------------------
+   Helpers
+------------------------------------------------ */
+
+type InstructorState = 
+| 'not_applied'
+| 'pending'
+| 'approved'
+| 'rejected' ;
+
+function getInstructorState(user: any): InstructorState {
+  if(!user?.instructorApplication) return 'not_applied';
+
+  return user.instructorApplication.status;
+}
+
 /* ---------------------------------------
    Role Guard (local to routes for now)
 ---------------------------------------- */
@@ -44,6 +60,29 @@ function RequireRole({
     return <Navigate to="/login" replace />;
   }
 
+  return children;
+}
+
+function RequireInstructorState({
+  allowed,
+  children,
+}: {
+  allowed: InstructorState[];
+  children: JSX.Element;
+}) {
+  const { user, isHydrating } = useAuth();
+
+  if (isHydrating)  return null;
+
+  const state = getInstructorState(user);
+
+  if(!allowed.includes(state)) {
+    if(state === 'approved') {
+      return <Navigate to="/login" replace />;
+    }
+
+    return <Navigate to="/instructor/status" replace/>;
+  }
   return children;
 }
 
@@ -108,7 +147,9 @@ export default function AppRoutes() {
           element={
             <ProtectedRoute>
               <RequireRole allowed={['student']}>
-                <InstructorApplyPage />
+                <RequireInstructorState allowed={['not_applied']}>
+                  <InstructorApplyPage />
+                </RequireInstructorState>
               </RequireRole>
             </ProtectedRoute>
           }
@@ -119,7 +160,11 @@ export default function AppRoutes() {
           element={
             <ProtectedRoute>
               <RequireRole allowed={['student', 'instructor']}>
-                <InstructorStatusPage />
+                <RequireInstructorState
+                  allowed={['pending', 'rejected']}
+                >
+                  <InstructorStatusPage />
+                </RequireInstructorState>
               </RequireRole>
             </ProtectedRoute>
           }
@@ -130,7 +175,9 @@ export default function AppRoutes() {
           element={
             <ProtectedRoute>
               <RequireRole allowed={['instructor']}>
-                <InstructorDashboardPage />
+                <RequireInstructorState allowed={['approved']}>
+                  <InstructorDashboardPage />
+                </RequireInstructorState>
               </RequireRole>
             </ProtectedRoute>
           }
