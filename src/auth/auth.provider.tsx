@@ -1,13 +1,15 @@
 import { useEffect, useState, type ReactNode } from 'react';
-import { AuthContext } from './auth.context';
+import { AuthContext, type RoleContext } from './auth.context';
 import { authApi } from '../api/auth.api';
 import { tokenStorage } from '../storage/token.storage';
+import { roleContextStorage } from '../storage/roleContext.storage';
 
 interface AuthProviderProps {
   children: ReactNode;
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
+  const [currentRole, setCurrentRole] = useState<RoleContext | null>(null);
   const [user, setUser] = useState<any | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isHydrating, setIsHydrating] = useState(true);
@@ -16,10 +18,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const hydrate = async () => {
       const token = tokenStorage.get();
 
+      const storedRole = roleContextStorage.get();
+
       if (!token) {
         setIsHydrating(false);
         return;
       }
+
+      //NEW - role context hydration
+      setCurrentRole(storedRole ?? 'student');
 
       try {
         const res = await authApi.me();
@@ -40,17 +47,30 @@ export function AuthProvider({ children }: AuthProviderProps) {
     hydrate();
   }, []);
 
-  async function login(email: string, password: string) {
+  async function login(
+    email: string,
+    password: string,
+    roleContext: RoleContext = 'student'
+  ) {
     const response = await authApi.login({ email, password });
     const { accessToken, user } = response.data;
 
     tokenStorage.set(accessToken);
+    roleContextStorage.set(roleContext);
+
     setUser(user);
+    setCurrentRole(roleContext);
     setIsAuthenticated(true);
   }
 
-  function authenticateWithToken(token: string) {
+  function authenticateWithToken(
+    token: string,
+    roleContext: RoleContext = 'student'
+  ) {
     tokenStorage.set(token);
+    roleContextStorage.set(roleContext);
+
+    setCurrentRole(roleContext);
     setIsAuthenticated(true);
   }
 
@@ -62,7 +82,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
 
     tokenStorage.clear();
+    roleContextStorage.clear();
+
+
     setUser(null);
+    setCurrentRole(null);
     setIsAuthenticated(false);
   }
 
@@ -72,6 +96,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         user,
         isAuthenticated,
         isHydrating,
+        currentRole,
         login,
         authenticateWithToken,
         logout,

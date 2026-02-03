@@ -1,5 +1,5 @@
 import { createContext } from 'react';
-export type RoleContext = 'student' | 'instrucctor' | 'admin'
+export type RoleContext = 'student' | 'instructor' | 'admin'
 
 export interface AuthContextValue {
   user: any | null;
@@ -11,14 +11,14 @@ export interface AuthContextValue {
   login: (
     email: string,
     password: string,
-    roleContext: RoleContext
+    roleContext?: RoleContext
   ) => Promise<void>;
 
 
   
   authenticateWithToken: (
     token: string,
-    roleContext: RoleContext
+    roleContext?: RoleContext
   ) => void;
 
   logout: () => Promise<void>;
