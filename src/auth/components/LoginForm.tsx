@@ -27,7 +27,7 @@ export default function LoginForm() {
       } else if( role === 'instructor') {
         navigate('/instructor/dashboard');
       } else {
-        navigate('/dashboard')
+        navigate('/home')
       }
       // navigate('/dashboard', { replace: true });
     } catch (err: any){

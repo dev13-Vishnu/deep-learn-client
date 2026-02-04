@@ -23,6 +23,7 @@ import AdminLoginPage from '../pages/admin/AdminLoginPage';
 import AdminDashboardPage from '../pages/admin/AdminDashBoardPage';
 
 import { RequireInstructorState, RequireRole} from '../auth/guards';
+import HomePage from '../pages/home/HomePage';
 
 
 
@@ -66,6 +67,17 @@ export default function AppRoutes() {
         <Route path="/" element={<LandingPage />} />
 
         {/* ----------------- Student Routes ----------------- */}
+        
+        <Route
+          path="/home"
+          element={
+            <ProtectedRoute>
+              <RequireRole allowed={['student']}>
+                <HomePage />
+              </RequireRole>
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/dashboard"
           element={
@@ -131,6 +143,8 @@ export default function AppRoutes() {
           }
         />
       </Route>
+
+
     </Routes>
   );
 }

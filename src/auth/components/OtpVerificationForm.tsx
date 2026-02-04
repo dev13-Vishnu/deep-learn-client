@@ -135,7 +135,7 @@ if (purpose === 'signup') {
   const { accessToken } = response.data;
   authenticateWithToken(accessToken);
 
-  navigate('/dashboard', { replace: true });
+  navigate('/home', { replace: true });
   return;
 }
 
