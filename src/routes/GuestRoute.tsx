@@ -1,6 +1,7 @@
 import type React from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../auth/useAuth";
+import { getAuthHomePath } from "../auth/navigation/getAuthHomePath";
 
 export default function GuestRoute({
   children,
@@ -10,16 +11,12 @@ export default function GuestRoute({
   const { isAuthenticated, currentRole } = useAuth();
 
   if (isAuthenticated) {
-    if (currentRole === "admin") {
-      return <Navigate to="/admin" replace />;
-    }
-
-    if (currentRole === "instructor") {
-      return <Navigate to="/instructor/dashboard" replace />;
-    }
-
-    // student (default)
-    return <Navigate to="/home" replace />;
+    return (
+        <Navigate
+            to={getAuthHomePath(true, currentRole)}
+            replace
+        />
+    );
   }
 
   return children;

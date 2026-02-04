@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../useAuth';
 import type { RoleContext } from '../auth.context';
+import { getAuthHomePath } from '../navigation/getAuthHomePath';
 
 export default function LoginForm() {
   const { login } = useAuth();
@@ -21,15 +22,10 @@ export default function LoginForm() {
     try {
       await login(email, password, role);
 
-      // TEMPERORY redirects (Step 2 only)
-      if(role ==='admin') {
-        navigate('/admin');
-      } else if( role === 'instructor') {
-        navigate('/instructor/dashboard');
-      } else {
-        navigate('/home')
-      }
-      // navigate('/dashboard', { replace: true });
+      navigate(
+        getAuthHomePath(true, role),
+        {replace: true}
+      );
     } catch (err: any){
       setError(
         err?.response?.data?.message ||  'Invalid email or password'
