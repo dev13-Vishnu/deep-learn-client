@@ -1,5 +1,5 @@
 import LandingPage from '../landing/LandingPage';
-import DashboardHome from '../dashboard/DashboardHome';
+import DashboardHome from './dashboard/DashboardHome';
 import { useAuth } from '../../auth/useAuth';
 
 export default function HomePage() {

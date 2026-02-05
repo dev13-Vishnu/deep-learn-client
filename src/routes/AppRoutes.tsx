@@ -13,7 +13,7 @@ import OtpVerification from '../auth/pages/OtpVerification';
 import ResetPassword from '../auth/pages/ResetPassword';
 
 import LandingPage from '../pages/landing/LandingPage';
-import DashboardHome from '../pages/dashboard/DashboardHome';
+import DashboardHome from '../pages/home/dashboard/DashboardHome';
 
 import InstructorApplyPage from '../pages/instructor/InstructorApplyPage';
 import InstructorStatusPage from '../pages/instructor/InstructorStatusPage';
