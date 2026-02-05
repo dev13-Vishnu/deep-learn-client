@@ -14,7 +14,7 @@ export default function Navbar ({
     showCategories = true,
 }:NavbarProps) {
     const navigate = useNavigate();
-    const {user, isAuthenticated, logout} = useAuth();
+    const {user, isAuthenticated, currentRole, logout} = useAuth();
 
     async function  handleLogout() {
         await logout();
@@ -45,6 +45,7 @@ export default function Navbar ({
                     isAuthenticated = {isAuthenticated}
                     user= {user}
                     onLogout = {handleLogout}
+                    role= {currentRole}
                 />
             </div>
         </header>

@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 
 interface Props {
   user: {
-    email: string;
-  };
+    email?: string;
+  } | null;
   onLogout: () => Promise<void>;
 }
 
@@ -12,7 +12,9 @@ export default function NavbarProfileMenu({ user, onLogout }: Props) {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
 
-  const initials = user.email.charAt(0).toUpperCase();
+  const initials = user?.email
+    ?user.email.charAt(0).toUpperCase()
+    : '?';
 
   return (
     <div className="relative">
