@@ -78,16 +78,6 @@ export default function AppRoutes() {
             </ProtectedRoute>
           }
         />
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <RequireRole allowed={['student']}>
-                <DashboardHome />
-              </RequireRole>
-            </ProtectedRoute>
-          }
-        />
 
         {/* ----------------- Instructor Routes ----------------- */}
         <Route
