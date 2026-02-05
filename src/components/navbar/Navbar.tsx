@@ -3,6 +3,7 @@ import { useAuth } from "../../auth/useAuth";
 import NavbarLogo from "./NavbarLogo";
 import NavbarSearch from "./NavbarSearch";
 import NavbarActions from "./NavbarActions";
+import { getPostLogoutRedirect } from "../../auth/navigation/getPostLogoutRedirect";
 
 export interface NavbarProps {
     showSearch?: boolean;
@@ -18,7 +19,7 @@ export default function Navbar ({
 
     async function  handleLogout() {
         await logout();
-        navigate('/login', {replace: true});
+        navigate(getPostLogoutRedirect(), {replace: true});
     }
     return (
         <header className="boarder-b border-[color:var(--color-border)] bg-white">
