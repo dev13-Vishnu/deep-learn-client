@@ -16,6 +16,11 @@ export default function NavbarProfileMenu({ user, onLogout }: Props) {
     ?user.email.charAt(0).toUpperCase()
     : '?';
 
+    async function handleLogout() {
+      setOpen(false);
+      await onLogout();
+    }
+
   return (
     <div className="relative">
       <button
@@ -34,7 +39,7 @@ export default function NavbarProfileMenu({ user, onLogout }: Props) {
             Profile
           </button>
           <button
-            onClick={onLogout}
+            onClick={handleLogout}
             className="block w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-gray-100"
           >
             Logout
