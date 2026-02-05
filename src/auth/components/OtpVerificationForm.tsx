@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { authApi } from '../../api/auth.api';
 import { useAuth } from '../useAuth';
+import { getAuthHomePath } from '../navigation/getAuthHomePath';
 
 export default function OtpVerificationForm() {
   const navigate = useNavigate();
@@ -135,7 +136,7 @@ if (purpose === 'signup') {
   const { accessToken } = response.data;
   authenticateWithToken(accessToken);
 
-  navigate('/home', { replace: true });
+  navigate(getAuthHomePath(true, 'student'), {replace: true})
   return;
 }
 
