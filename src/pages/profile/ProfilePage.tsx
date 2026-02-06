@@ -1,11 +1,35 @@
 import { useEffect, useState } from 'react';
-import { getMyProfile, type UserProfile } from '../../api/profile.api';
+import { getMyProfile, updateMyProfile, type UserProfile } from '../../api/profile.api';
 
 export default function ProfilePage() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null> (null);
+
+  async function handleSave() {
+    if (!profile) return;
+
+    try{
+        setSaving(true); 
+        setSaveError(null);
+
+        await updateMyProfile({
+            firstName: profile.firstName ?? undefined,
+            lastName: profile.lastName ?? undefined,
+            bio: profile. bio ?? undefined,
+        });
+
+        setIsEditing(false);
+    } catch {
+        setSaveError('Failed to save profiles');
+    } finally {
+        setSaving(false);
+    }
+  }
 
   useEffect(() => {
     async function loadProfile() {
@@ -56,6 +80,9 @@ export default function ProfilePage() {
           profile={profile}
           onCancel={() => setIsEditing(false)}
           onChange={setProfile}
+          onSave={handleSave}
+          saving={saving}
+          error={saveError}
         />
       )}
     </div>
@@ -85,13 +112,25 @@ function ProfileEditForm({
   profile,
   onCancel,
   onChange,
+  onSave,
+  saving,
+  error,
 }: {
   profile: UserProfile;
   onCancel: () => void;
   onChange: (p: UserProfile) => void;
+  onSave: () => Promise<void>;
+  saving: boolean;
+  error: string | null;
 }) {
   return (
-    <form className="space-y-4">
+    <form
+        className="space-y-4"
+        onSubmit={(e) => {
+            e.preventDefault();
+            onSave();
+        }}
+    >
       <Input
         label="First name"
         value={profile.firstName ?? ''}
@@ -110,20 +149,24 @@ function ProfileEditForm({
         onChange={(v) => onChange({ ...profile, bio: v })}
       />
 
+    {error && (
+        <p className="text-sm text-red-600">{error}</p>
+    )}
       <div className="flex gap-3 pt-4">
         <button
           type="button"
           onClick={onCancel}
+          disabled = {saving}
           className="rounded-md border px-4 py-2"
         >
           Cancel
         </button>
         <button
           type="submit"
-          disabled
+          disabled = {saving}
           className="rounded-md bg-gray-400 px-4 py-2 text-white"
         >
-          Save (next step)
+            {saving ? "Saving...": 'Save'}
         </button>
       </div>
     </form>
