@@ -85,9 +85,7 @@ export default function AppRoutes() {
           element={
             <ProtectedRoute>
               <RequireRole allowed={['student']}>
-                <RequireInstructorState allowed={['not_applied']}>
-                  <InstructorApplyPage />
-                </RequireInstructorState>
+                <InstructorApplyPage />
               </RequireRole>
             </ProtectedRoute>
           }
@@ -98,11 +96,7 @@ export default function AppRoutes() {
           element={
             <ProtectedRoute>
               <RequireRole allowed={['student', 'instructor']}>
-                <RequireInstructorState
-                  allowed={['pending', 'rejected']}
-                >
-                  <InstructorStatusPage />
-                </RequireInstructorState>
+                <InstructorStatusPage />
               </RequireRole>
             </ProtectedRoute>
           }
@@ -113,7 +107,7 @@ export default function AppRoutes() {
           element={
             <ProtectedRoute>
               <RequireRole allowed={['instructor']}>
-                <RequireInstructorState allowed={['approved']}>
+                <RequireInstructorState>
                   <InstructorDashboardPage />
                 </RequireInstructorState>
               </RequireRole>
