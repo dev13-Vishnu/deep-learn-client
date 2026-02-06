@@ -2,8 +2,11 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getInstructorStatus } from '../../api/instructor.api';
 
-type InstructorStatus = 'pending' | 'rejected' | 'approved';
-
+type InstructorStatus =
+  | 'pending'
+  | 'approved'
+  | 'rejected'
+  | 'blocked';
 // 🔧 MOCK — change this to test states
 // const MOCK_STATUS: InstructorStatus = 'pending';
 
@@ -11,13 +14,19 @@ export default function InstructorStatusPage() {
   const navigate = useNavigate();
   const [status, setStatus] = useState<InstructorStatus | null> (null);
   const [loading, setLoading] = useState(true);
+  const [ error, setError ] = useState<string | null > (null);
 
   useEffect(() => {
     async function loadStatus() {
       try {
         const data = await getInstructorStatus();
         setStatus(data.status);
-      } catch {
+        setError(null);
+      } catch (err: any) {
+        setError(
+          err?.response?.data?.message ||
+          'Failed to load instructor status'
+        );
         setStatus(null);
       } finally {
         setLoading(false);
