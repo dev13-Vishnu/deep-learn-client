@@ -16,9 +16,7 @@ export async function applyForInstructor(
   return data;
 }
 
-export async function getInstructorStatus():Promise<{
-  status: 'pending' | 'approved' | 'rejected' | 'blocked' | null;
-}> {
+export async function getInstructorStatus(){
   try {
     console.log('[Instructor API] Fetching instructor status');
     const { data } = await apiClient.get('/instructor/status');
