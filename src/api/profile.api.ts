@@ -1,21 +1,40 @@
-import apiClient from "./axios";
+import apiClient from './axios';
 
-export interface UserProfile {
-    firstName : string | null;
-    lastName: string | null;
-    bio: string | null;
-    avatarUrl: string | null;
+export interface ProfileData {
+  id: string;
+  email: string;
+  firstName: string | null;
+  lastName: string | null;
+  avatarUrl: string | null;
+  bio: string | null;
+  role: number;
+  createdAt: string;
 }
 
-export async function getMyProfile(): Promise<UserProfile> {
-    const { data } = await apiClient.get('/auth/me');
-    return data.user.profile;
+export interface UpdateProfileData {
+  firstName?: string;
+  lastName?: string;
+  bio?: string;
 }
 
-export async function updateMyProfile(input:{
-    firstName?: string;
-    lastName?: string;
-    bio?: string;
-}): Promise<void> {
-    await apiClient.patch('/user/me/profile', input);
-}
+export const profileApi = {
+  getProfile(): Promise<{ data: ProfileData }> {
+    return apiClient.get('/profile');
+  },
+
+  updateProfile(data: UpdateProfileData) {
+    return apiClient.patch('/profile', data);
+  },
+
+  uploadAvatar(file: File) {
+    const formData = new FormData();
+    formData.append('avatar', file);
+    return apiClient.post('/profile/avatar', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
+
+  deleteAvatar() {
+    return apiClient.delete('/profile/avatar');
+  },
+};
