@@ -13,7 +13,6 @@ import OtpVerification from '../auth/pages/OtpVerification';
 import ResetPassword from '../auth/pages/ResetPassword';
 
 import LandingPage from '../pages/landing/LandingPage';
-import DashboardHome from '../pages/home/dashboard/DashboardHome';
 
 import InstructorApplyPage from '../pages/instructor/InstructorApplyPage';
 import InstructorStatusPage from '../pages/instructor/InstructorStatusPage';
@@ -24,6 +23,7 @@ import AdminDashboardPage from '../pages/admin/AdminDashBoardPage';
 
 import { RequireInstructorState, RequireRole} from '../auth/guards';
 import HomePage from '../pages/home/HomePage';
+import ProfilePage from '../pages/profile/ProfilePage';
 
 
 
@@ -75,6 +75,15 @@ export default function AppRoutes() {
               <RequireRole allowed={['student']}>
                 <HomePage />
               </RequireRole>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <ProfilePage />
             </ProtectedRoute>
           }
         />

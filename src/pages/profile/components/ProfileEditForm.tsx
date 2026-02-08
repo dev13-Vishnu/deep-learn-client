@@ -54,7 +54,7 @@ export default function ProfileEditForm({ profile, onSave, onCancel }: Props) {
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1">Name</label>
+          <label className="block text-sm font-medium mb-1">First Name</label>
           <input
             type="text"
             value={formData.firstName}
@@ -64,7 +64,7 @@ export default function ProfileEditForm({ profile, onSave, onCancel }: Props) {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">Name</label>
+          <label className="block text-sm font-medium mb-1">Last Name</label>
           <input
             type="text"
             value={formData.lastName}
