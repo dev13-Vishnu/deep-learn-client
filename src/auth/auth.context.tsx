@@ -1,4 +1,6 @@
 import { createContext } from 'react';
+import type { InstructorState } from './types';
+
 export type RoleContext = 'student' | 'instructor' | 'admin'
 
 export interface AuthContextValue {
@@ -7,12 +9,13 @@ export interface AuthContextValue {
   isHydrating: boolean;
 
   currentRole: RoleContext | null;
+  instructorState: InstructorState | null;
 
   login: (
     email: string,
     password: string,
     roleContext?: RoleContext
-  ) => Promise<void>;
+  ) => Promise<any>; // returns user data
 
 
   

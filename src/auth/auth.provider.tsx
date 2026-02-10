@@ -3,6 +3,7 @@ import { AuthContext, type RoleContext } from './auth.context';
 import { authApi } from '../api/auth.api';
 import { tokenStorage } from '../storage/token.storage';
 import { roleContextStorage } from '../storage/roleContext.storage';
+import type { InstructorState } from './types';
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -13,6 +14,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<any | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isHydrating, setIsHydrating] = useState(true);
+  const [instructorState, setInstructorState] = useState<InstructorState | null>(null);
 
   useEffect(() => {
     const hydrate = async () => {
@@ -31,6 +33,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       try {
         const res = await authApi.me();
         setUser(res.data.user);
+        setInstructorState(res.data.user.instructorState ?? null);
         setIsAuthenticated(true);
       } catch (err: any) {
         if (err?.response?.status !== 401) {
@@ -51,7 +54,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     email: string,
     password: string,
     roleContext: RoleContext = 'student'
-  ) {
+  ): Promise<any> {
     const response = await authApi.login({ email, password });
     const { accessToken, user } = response.data;
 
@@ -59,8 +62,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
     roleContextStorage.set(roleContext);
 
     setUser(user);
+    setInstructorState(user.instructorState ?? null);
     setCurrentRole(roleContext);
     setIsAuthenticated(true);
+
+    return user;
   }
 
   function authenticateWithToken(
@@ -87,6 +93,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     setUser(null);
     setCurrentRole(null);
+    setInstructorState(null);
     setIsAuthenticated(false);
   }
 
@@ -97,6 +104,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         isAuthenticated,
         isHydrating,
         currentRole,
+        instructorState,
         login,
         authenticateWithToken,
         logout,

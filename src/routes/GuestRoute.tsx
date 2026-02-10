@@ -8,12 +8,12 @@ export default function GuestRoute({
 }: {
   children: React.ReactNode;
 }) {
-  const { isAuthenticated, currentRole } = useAuth();
+  const { isAuthenticated, currentRole, instructorState } = useAuth();
 
   if (isAuthenticated) {
     return (
         <Navigate
-            to={getAuthHomePath(true, currentRole)}
+            to={getAuthHomePath(isAuthenticated, currentRole, instructorState)}
             replace
         />
     );

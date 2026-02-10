@@ -2,9 +2,6 @@ import type { JSX } from "react";
 import { useAuth } from "../useAuth";
 import { Navigate } from "react-router-dom";
 
-
-
-
 interface RequireInstructorStateProps {
     children: JSX.Element;
 }
@@ -12,14 +9,14 @@ interface RequireInstructorStateProps {
 export default function RequireInstructorState({
     children,
 }: RequireInstructorStateProps) {
-    const { currentRole, isHydrating } = useAuth();
+    const { instructorState, isHydrating } = useAuth();
 
     if (isHydrating) return null;
 
 
-    if ( currentRole !== 'instructor') {
-
-        return <Navigate to="/instructor/status" replace />;
+    // only approved instructor can access
+    if (instructorState !== 'approved') {
+        return <Navigate to="/instructor/status" replace />
     }
     
     return children;

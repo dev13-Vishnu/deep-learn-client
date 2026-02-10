@@ -12,6 +12,8 @@ export default function ApplicationCard({ application, onApprove, onReject }: Pr
     approved: 'bg-green-100 text-green-800',
     rejected: 'bg-red-100 text-red-800',
   };
+  const status = application.status ?? 'pending';
+
 
   return (
     <div className="rounded-lg border bg-white p-6">
@@ -23,7 +25,8 @@ export default function ApplicationCard({ application, onApprove, onReject }: Pr
           </p>
         </div>
         <span className={`px-3 py-1 rounded-full text-xs font-medium ${statusColors[application.status]}`}>
-          {application.status.charAt(0).toUpperCase() + application.status.slice(1)}
+          {status.charAt(0).toUpperCase() + status.slice(1)}
+
         </span>
       </div>
 

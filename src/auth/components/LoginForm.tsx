@@ -20,12 +20,15 @@ export default function LoginForm() {
     setLoading(true);
 
     try {
-      await login(email, password, role);
+      const userData = await login(email, password, role);
 
-      navigate(
-        getAuthHomePath(true, role),
-        {replace: true}
+      const homePath  = getAuthHomePath(
+        true,
+        role,
+        userData.instructorState ?? null,
       );
+
+      navigate(homePath,{replace: true});
     } catch (err: any){
       setError(
         err?.response?.data?.message ||  'Invalid email or password'

@@ -93,9 +93,9 @@ export default function AppRoutes() {
           path="/instructor/apply"
           element={
             <ProtectedRoute>
-              <RequireRole allowed={['student']}>
+              {/* <RequireRole allowed={['student']}> */}
                 <InstructorApplyPage />
-              </RequireRole>
+              {/* </RequireRole> */}
             </ProtectedRoute>
           }
         />
@@ -104,9 +104,9 @@ export default function AppRoutes() {
           path="/instructor/status"
           element={
             <ProtectedRoute>
-              <RequireRole allowed={['student', 'instructor']}>
+              {/* <RequireRole allowed={['student', 'instructor']}> */}
                 <InstructorStatusPage />
-              </RequireRole>
+              {/* </RequireRole> */}
             </ProtectedRoute>
           }
         />
