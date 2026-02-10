@@ -1,5 +1,6 @@
 import { useAuth } from "../../auth/useAuth";
 import LoadingSpinner from "../LoadingSpinner";
+import AdminProfilePage from "./AdminProfilePage";
 import InstructorProfilePage from "./InstructorProfilePage";
 import StudentProfilePage from "./StudentProfile";
 
@@ -11,6 +12,10 @@ export default function ProfilePage() {
   }
 
   // Route to correct profile based on role
+if (currentRole === 'admin') {
+    return <AdminProfilePage />;
+  }
+
   if (currentRole === 'instructor') {
     return <InstructorProfilePage />;
   }
