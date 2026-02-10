@@ -45,19 +45,6 @@ export default function ProfileHeader({ profile }: Props) {
             {roleLabel}
           </span>
         </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-500 mb-1">
-            Member Since
-          </label>
-          <p className="text-base">
-            {new Date(profile.createdAt).toLocaleDateString('en-US', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-            })}
-          </p>
-        </div>
       </div>
     </div>
   );
