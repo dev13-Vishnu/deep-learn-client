@@ -125,7 +125,7 @@ export default function AppRoutes() {
         />
 
         {/* ----------------- Admin Routes ----------------- */}
-        <Route path="/admin/login" element={<AdminLoginPage />} />
+        {/* <Route path="/admin/login" element={<AdminLoginPage />} /> */}
 
         <Route
           path="/admin"
