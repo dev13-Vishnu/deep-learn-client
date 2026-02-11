@@ -3,6 +3,8 @@ import { authApi } from '../../api/auth.api';
 import { useNavigate } from 'react-router-dom';
 
 export default function SignupForm() {
+  const [firstName, setFirstName] = useState('');
+const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -34,6 +36,8 @@ export default function SignupForm() {
         JSON.stringify({
           email,
           password,
+          firstName,
+          lastName,
         }),
       );
 
@@ -57,8 +61,20 @@ export default function SignupForm() {
       {error && <p className="mb-4 text-sm text-[color:var(--color-danger)]">{error}</p>}
 
       <div className="mb-4 flex gap-3">
-        <input type="text" placeholder="First Name" />
-        <input type="text" placeholder="Last Name" />
+        <input
+          type="text"
+          placeholder="First Name"
+          value={firstName}
+          onChange={(e) => setFirstName(e.target.value)}
+          required
+        />
+        <input
+          type="text"
+          placeholder="Last Name"
+          value={lastName}
+          onChange={(e) => setLastName(e.target.value)}
+          required
+        />
       </div>
 
       <div className="mb-4 flex gap-3">

@@ -13,6 +13,8 @@ export default function OtpVerificationForm() {
     email: string;
     password: string;
     role: string;
+    firstName: string;
+    lastName: string;
   } | null>(null);
 
   const [otp, setOtp] = useState<string[]>(Array(6).fill(''));
@@ -65,6 +67,8 @@ export default function OtpVerificationForm() {
       email: emailFromState,
       password: '', // not used
       role: '',
+      firstName: '',
+      lastName: '',
     });
     return;
   }
@@ -85,7 +89,7 @@ export default function OtpVerificationForm() {
     return null;
   }
 
-  const { email, password } = signupData;
+  const { email, password, firstName, lastName } = signupData;
 
   const maskedEmail = email.replace(
     /^(.)(.*)(@.*)$/,
@@ -131,6 +135,8 @@ if (purpose === 'signup') {
     email,
     otp: otp.join(''),
     password,
+    firstName, 
+    lastName
   });
 
   const { accessToken } = response.data;

@@ -13,6 +13,8 @@ export const authApi = {
     email: string;
     otp: string;
     password: string;
+    firstName: string;
+    lastName: string;
   }) {
     return apiClient.post('/auth/signup', data);
   },
