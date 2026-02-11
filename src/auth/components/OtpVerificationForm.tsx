@@ -114,6 +114,32 @@ export default function OtpVerificationForm() {
     }
   };
 
+  const handleResendOtp = async () => {
+  if (!signupData) return;
+
+  try {
+    setError(null);
+
+    await authApi.requestOtp({
+      email: signupData.email,
+      purpose:
+        purpose === 'signup'
+          ? 'signup'
+          : 'forgot-password',
+    });
+
+    // Reset timer
+    setTimer(60);
+
+    // Clear OTP boxes
+    setOtp(Array(6).fill(''));
+
+  } catch (err: any) {
+    setError(err?.response?.data?.message || 'Failed to resend OTP');
+  }
+};
+
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -208,7 +234,11 @@ if (purpose === 'forgot-password') {
         {timer > 0 ? (
           <>Resend code in {timer}s</>
         ) : (
-          <button type="button" onClick={() => setTimer(60)} className="underline">
+          <button
+            type="button"
+            disabled={loading}
+            onClick={handleResendOtp}
+            className="underline disabled:opacity-50">
             Resend code
           </button>
         )}
