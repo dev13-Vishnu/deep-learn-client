@@ -57,7 +57,7 @@ export default function ProfileEditForm({ profile, onSave, onCancel }: Props) {
           <label className="block text-sm font-medium mb-1">First Name</label>
           <input
             type="text"
-            value={formData.firstName}
+            value={formData.firstName + " "+ formData.lastName}
             onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
             placeholder="Enter your First Name"
             className="w-full"

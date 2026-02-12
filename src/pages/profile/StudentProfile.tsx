@@ -1,7 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useAuth } from '../../auth/useAuth';
 import { profileApi, type ProfileData } from '../../api/profile.api';
-import { useNavigate } from 'react-router-dom';
 import AvatarUpload from './components/AvatarUpload';
 import ProfileEditForm from './components/ProfileEditForm';
 import ProfileHeader from './components/ProfileHeader';

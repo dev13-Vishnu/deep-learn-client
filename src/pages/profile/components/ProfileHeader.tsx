@@ -25,9 +25,15 @@ export default function ProfileHeader({ profile }: Props) {
 
         <div>
           <label className="block text-sm font-medium text-gray-500 mb-1">
-            Name
+            First Name
           </label>
           <p className="text-base">{profile.firstName || '—'}</p>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-500 mb-1">
+            Last Name
+          </label>
+          <p className="text-base">{profile.lastName || '—'}</p>
         </div>
 
         <div>

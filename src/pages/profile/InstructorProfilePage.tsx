@@ -6,7 +6,7 @@ import ProfileEditForm from './components/ProfileEditForm';
 import ProfileHeader from './components/ProfileHeader';
 
 export default function InstructorProfilePage() {
-  const { user, instructorState } = useAuth();
+  const { instructorState } = useAuth();
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);

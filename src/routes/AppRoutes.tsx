@@ -18,7 +18,6 @@ import InstructorApplyPage from '../pages/instructor/InstructorApplyPage';
 import InstructorStatusPage from '../pages/instructor/InstructorStatusPage';
 import InstructorDashboardPage from '../pages/instructor/InstructorDashboardPage';
 
-import AdminLoginPage from '../pages/admin/AdminLoginPage';
 import AdminDashboardPage from '../pages/admin/AdminDashBoardPage';
 
 import { RequireInstructorState, RequireRole} from '../auth/guards';
