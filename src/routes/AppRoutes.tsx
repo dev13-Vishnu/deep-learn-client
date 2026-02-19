@@ -23,6 +23,7 @@ import AdminDashboardPage from '../pages/admin/AdminDashBoardPage';
 import { RequireInstructorState, RequireRole} from '../auth/guards';
 import HomePage from '../pages/home/HomePage';
 import ProfilePage from '../pages/profile/ProfilePage';
+import OAuthCallbackPage from '../auth/pages/OAuthCallbackPage';
 
 
 
@@ -134,6 +135,7 @@ export default function AppRoutes() {
             </AdminRoute>
           }
         />
+      <Route path="/auth/callback" element={<OAuthCallbackPage />} />
       </Route>
 
 

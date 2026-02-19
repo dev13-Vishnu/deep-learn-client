@@ -56,6 +56,9 @@ logout() {
   return apiClient.post('/auth/logout');
 },
 
+getOAuthRedirectUrl(provider: 'google' | 'facebook' | 'microsoft'): string {
+  return `${import.meta.env.VITE_API_BASE_URL}/auth/oauth/${provider}`
+}
 
 
 

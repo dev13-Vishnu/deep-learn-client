@@ -3,9 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../useAuth';
 import type { RoleContext } from '../auth.context';
 import { getAuthHomePath } from '../navigation/getAuthHomePath';
+import { useOAuth } from '../hooks/useOAuth';
 
 export default function LoginForm() {
   const { login } = useAuth();
+  const {handleOAuthLogin, isLoading:oauthLoading } = useOAuth();
   const navigate = useNavigate();
 
   const [email, setEmail] = useState('');
@@ -123,24 +125,30 @@ export default function LoginForm() {
       <div className="my-5 text-center text-sm text-[color:var(--color-muted)]">Sign in with</div>
 
       <div className="flex gap-3">
-        <button
+        {/* <button
           type="button"
+          onClick={() => handleOAuthLogin('facebook')}
+          disabled = {loading || oauthLoading}
           className="flex-1 border border-[color:var(--color-border)] bg-white py-2"
         >
           Facebook
-        </button>
+        </button> */}
         <button
           type="button"
+          onClick={() => handleOAuthLogin('google')}
+          disabled = {loading || oauthLoading}
           className="flex-1 border border-[color:var(--color-border)] bg-white py-2"
         >
           Google
         </button>
-        <button
+        {/* <button
           type="button"
+          onClick={() => handleOAuthLogin('microsoft')}
+          disabled = {loading || oauthLoading}
           className="flex-1 border border-[color:var(--color-border)] bg-white py-2"
         >
           Microsoft
-        </button>
+        </button> */}
       </div>
     </form>
   );

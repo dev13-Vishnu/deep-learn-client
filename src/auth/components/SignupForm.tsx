@@ -3,6 +3,7 @@ import { authApi } from '../../api/auth.api';
 import { useNavigate } from 'react-router-dom';
 
 export default function SignupForm() {
+
   const [firstName, setFirstName] = useState('');
 const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
@@ -126,24 +127,24 @@ const [lastName, setLastName] = useState('');
       <div className="my-5 text-center text-sm text-[color:var(--color-muted)]">Sign up with</div>
 
       <div className="flex gap-3">
-        <button
+        {/* <button
           type="button"
           className="flex-1 border border-[color:var(--color-border)] bg-white py-2"
         >
           Facebook
-        </button>
+        </button> */}
         <button
           type="button"
           className="flex-1 border border-[color:var(--color-border)] bg-white py-2"
         >
           Google
         </button>
-        <button
+        {/* <button
           type="button"
           className="flex-1 border border-[color:var(--color-border)] bg-white py-2"
         >
           Microsoft
-        </button>
+        </button> */}
       </div>
     </form>
   );
