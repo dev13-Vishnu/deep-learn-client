@@ -11,6 +11,7 @@ export interface InstructorApplication {
   language: string;
   status: 'pending' | 'approved' | 'rejected';
   rejectionReason: string | null;
+  cooldownExpiresAt: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -22,6 +23,14 @@ export interface ListApplicationsResponse {
     limit: number;
     total: number;
     totalPages: number;
+  };
+}
+
+export interface RejectApplicationResult {
+  message: string;
+  cooldown: {
+    expiresAt: string;
+    durationDays: number;
   };
 }
 
