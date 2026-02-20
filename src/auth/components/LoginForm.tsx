@@ -4,36 +4,49 @@ import { useAuth } from '../useAuth';
 import type { RoleContext } from '../auth.context';
 import { getAuthHomePath } from '../navigation/getAuthHomePath';
 import { useOAuth } from '../hooks/useOAuth';
+import { useNotify } from '../../notifications/useNotify';
+import { FieldError } from '../../components/FieldError';
+import { validateEmail, validatePassword } from '../../utils/validation';
 
 export default function LoginForm() {
   const { login } = useAuth();
-  const {handleOAuthLogin, isLoading:oauthLoading } = useOAuth();
+  const { handleOAuthLogin, isLoading: oauthLoading } = useOAuth();
   const navigate = useNavigate();
+  const notify = useNotify();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role,setRole] = useState<RoleContext>('student');
+  const [role, setRole] = useState<RoleContext>('student');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+
+  const [emailError, setEmailError] = useState<string | null>(null);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+
+  function validateAll(): boolean {
+    const eErr = validateEmail(email);
+    // Use validatePassword so strength rules are checked before the network call.
+    // A user with a weak password will get a clear message instead of a cryptic
+    // 401 from the server.
+    const pErr = validatePassword(password);
+    setEmailError(eErr);
+    setPasswordError(pErr);
+    return !eErr && !pErr;
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
-    setLoading(true);
+    if (!validateAll()) return;   // ← blocks submission if either field fails
 
+    setLoading(true);
     try {
       const userData = await login(email, password, role);
-
-      const homePath  = getAuthHomePath(
-        true,
-        role,
-        userData.instructorState ?? null,
-      );
-
-      navigate(homePath,{replace: true});
-    } catch (err: any){
-      setError(
-        err?.response?.data?.message ||  'Invalid email or password'
+      // userData.instructorState is now returned by the server (LoginUserUseCase fix)
+      const homePath = getAuthHomePath(true, role, userData.instructorState ?? null);
+      navigate(homePath, { replace: true });
+    } catch (err: any) {
+      notify(
+        err?.response?.data?.message || 'Invalid email or password.',
+        'error'
       );
     } finally {
       setLoading(false);
@@ -42,56 +55,63 @@ export default function LoginForm() {
 
   return (
     <form onSubmit={handleSubmit} className="w-full max-w-[var(--container-sm)]">
-      {/* Role Toggle */}
-      <div>
-        <label className="block text-sm font-medium mb-2">
-          Login as
-        </label>
+      {/* Role toggle */}
+      <div className="mb-6">
+        <label className="block text-sm font-medium mb-2">Login as</label>
         <div className="grid grid-cols-3 gap-2">
-          {(['student', 'instructor', 'admin'] as RoleContext[]).map(
-            (r) => (
-              <button
-                key={r}
-                type='button'
-                onClick={() => setRole(r)}
-                className={`py-2 rounded-md text-sm font-medium border transition
-                  ${
-                    role === r
-                      ? 'bg-black text-white'
-                      : 'bg-white text-gray-700 hover:bg-gray-50'
-                  }`}
-              >
-                {r.charAt(0).toUpperCase() +r.slice(1)}
-              </button>
-            )
-          )}
+          {(['student', 'instructor', 'admin'] as RoleContext[]).map((r) => (
+            <button
+              key={r}
+              type="button"
+              onClick={() => setRole(r)}
+              className={`py-2 rounded-md text-sm font-medium border transition capitalize ${
+                role === r
+                  ? 'bg-black text-white'
+                  : 'bg-white text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              {r}
+            </button>
+          ))}
         </div>
       </div>
-      
+
       <h2 className="mb-6">Sign in to your account</h2>
 
-      {error && <p className="mb-4 text-sm text-[color:var(--color-danger)]">{error}</p>}
-
+      {/* Email */}
       <div className="mb-4">
         <label className="mb-1 block text-sm">Email</label>
         <input
           type="email"
           placeholder="Username or Email ID"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
+          onChange={(e) => {
+            setEmail(e.target.value);
+            if (emailError) setEmailError(validateEmail(e.target.value));
+          }}
+          onBlur={() => setEmailError(validateEmail(email))}
+          className={emailError ? 'border-[color:var(--color-danger)]' : ''}
+          disabled={loading}
         />
+        <FieldError message={emailError} />
       </div>
 
-      <div className="mb-4">
+      {/* Password */}
+      <div className="mb-6">
         <label className="mb-1 block text-sm">Password</label>
         <input
           type="password"
           placeholder="Enter Password"
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
+          onChange={(e) => {
+            setPassword(e.target.value);
+            if (passwordError) setPasswordError(validatePassword(e.target.value));
+          }}
+          onBlur={() => setPasswordError(validatePassword(password))}
+          className={passwordError ? 'border-[color:var(--color-danger)]' : ''}
+          disabled={loading}
         />
+        <FieldError message={passwordError} />
       </div>
 
       <button
@@ -113,7 +133,7 @@ export default function LoginForm() {
       </div>
 
       <div className="mt-4 text-center text-sm text-[color:var(--color-muted)]">
-        Don&apos;t have an account?{' '}
+        Don't have an account?{' '}
         <span
           onClick={() => navigate('/signup')}
           className="cursor-pointer font-medium text-[color:var(--color-primary)]"
@@ -125,30 +145,14 @@ export default function LoginForm() {
       <div className="my-5 text-center text-sm text-[color:var(--color-muted)]">Sign in with</div>
 
       <div className="flex gap-3">
-        {/* <button
-          type="button"
-          onClick={() => handleOAuthLogin('facebook')}
-          disabled = {loading || oauthLoading}
-          className="flex-1 border border-[color:var(--color-border)] bg-white py-2"
-        >
-          Facebook
-        </button> */}
         <button
           type="button"
           onClick={() => handleOAuthLogin('google')}
-          disabled = {loading || oauthLoading}
+          disabled={loading || oauthLoading}
           className="flex-1 border border-[color:var(--color-border)] bg-white py-2"
         >
           Google
         </button>
-        {/* <button
-          type="button"
-          onClick={() => handleOAuthLogin('microsoft')}
-          disabled = {loading || oauthLoading}
-          className="flex-1 border border-[color:var(--color-border)] bg-white py-2"
-        >
-          Microsoft
-        </button> */}
       </div>
     </form>
   );

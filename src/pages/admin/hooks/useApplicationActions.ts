@@ -1,26 +1,23 @@
 import { useState, useCallback } from 'react';
 import { adminApi, type InstructorApplication } from '../../../api/admin.api';
-import type { ToastType } from '../components/Toast';
+import { useNotify } from '../../../notifications/useNotify';
 
 interface UseApplicationActionsReturn {
-  // Modal state
   approveTarget: InstructorApplication | null;
   rejectTarget: InstructorApplication | null;
   isActioning: boolean;
-
-  // Open/close modals
   openApproveModal: (app: InstructorApplication) => void;
   openRejectModal: (app: InstructorApplication) => void;
   closeModals: () => void;
-
-  // Confirm actions
   confirmApprove: (onSuccess: (id: string) => void) => Promise<void>;
   confirmReject: (reason: string, onSuccess: (id: string) => void) => Promise<void>;
 }
 
-type AddToast = (text: string, type: ToastType) => void;
+// No longer takes addToast as a parameter — uses the global notification system.
+// Swapping to react-toastify only requires changing NotificationProvider.tsx.
+export function useApplicationActions(): UseApplicationActionsReturn {
+  const notify = useNotify();
 
-export function useApplicationActions(addToast: AddToast): UseApplicationActionsReturn {
   const [approveTarget, setApproveTarget] = useState<InstructorApplication | null>(null);
   const [rejectTarget, setRejectTarget] = useState<InstructorApplication | null>(null);
   const [isActioning, setIsActioning] = useState(false);
@@ -43,14 +40,13 @@ export function useApplicationActions(addToast: AddToast): UseApplicationActions
       if (!approveTarget) return;
       const id = approveTarget.id;
       setIsActioning(true);
-
       try {
         await adminApi.approveApplication(id);
         closeModals();
-        onSuccess(id); // triggers optimistic update
-        addToast('Application approved. Instructor role granted.', 'success');
+        onSuccess(id);
+        notify('Application approved. Instructor role has been granted.', 'success');
       } catch (err: any) {
-        addToast(
+        notify(
           err?.response?.data?.message ?? 'Failed to approve application.',
           'error'
         );
@@ -58,7 +54,7 @@ export function useApplicationActions(addToast: AddToast): UseApplicationActions
         setIsActioning(false);
       }
     },
-    [approveTarget, closeModals, addToast]
+    [approveTarget, closeModals, notify]
   );
 
   const confirmReject = useCallback(
@@ -66,17 +62,16 @@ export function useApplicationActions(addToast: AddToast): UseApplicationActions
       if (!rejectTarget) return;
       const id = rejectTarget.id;
       setIsActioning(true);
-
       try {
         const { data } = await adminApi.rejectApplication(id, reason);
         closeModals();
-        onSuccess(id); // triggers optimistic update
-        addToast(
-          `Application rejected. Cooldown: ${data.cooldown.durationDays} days.`,
+        onSuccess(id);
+        notify(
+          `Application rejected. Applicant cannot reapply for ${data.cooldown.durationDays} days.`,
           'success'
         );
       } catch (err: any) {
-        addToast(
+        notify(
           err?.response?.data?.message ?? 'Failed to reject application.',
           'error'
         );
@@ -84,7 +79,7 @@ export function useApplicationActions(addToast: AddToast): UseApplicationActions
         setIsActioning(false);
       }
     },
-    [rejectTarget, closeModals, addToast]
+    [rejectTarget, closeModals, notify]
   );
 
   return {

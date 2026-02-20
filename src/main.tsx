@@ -3,11 +3,14 @@ import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import './index.css';
 import { AuthProvider } from './auth/auth.provider';
+import { NotificationProvider } from './notifications/Notificationprovider';
 
 createRoot(document.getElementById('root')!).render(
   <BrowserRouter>
-    <AuthProvider>
+    <NotificationProvider>
+      <AuthProvider>
       <App />
     </AuthProvider>
+    </NotificationProvider>
   </BrowserRouter>,
 );

@@ -9,18 +9,19 @@ export default function InstructorProfilePage() {
   const { instructorState } = useAuth();
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
 
-  useEffect(() => {
-    loadProfile();
-  }, []);
+  useEffect(() => { loadProfile(); }, []);
 
   async function loadProfile() {
+    setLoading(true);
+    setLoadError(null);
     try {
       const { data } = await profileApi.getProfile();
       setProfile(data);
-    } catch (err) {
-      console.error('Failed to load profile:', err);
+    } catch (err: any) {
+      setLoadError(err?.response?.data?.message || 'Failed to load profile.');
     } finally {
       setLoading(false);
     }
@@ -29,15 +30,24 @@ export default function InstructorProfilePage() {
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[color:var(--color-primary)]"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[color:var(--color-primary)]" />
       </div>
     );
   }
 
-  if (!profile) {
+  if (loadError || !profile) {
     return (
       <div className="mx-auto max-w-4xl px-6 py-12">
-        <p className="text-center text-red-600">Failed to load profile</p>
+        <div className="rounded-lg border border-red-200 bg-red-50 p-6">
+          <h2 className="text-lg font-semibold text-red-900">Failed to load profile</h2>
+          <p className="mt-2 text-sm text-red-700">{loadError ?? 'An unexpected error occurred.'}</p>
+          <button
+            onClick={loadProfile}
+            className="mt-4 rounded-md bg-red-600 px-4 py-2 text-sm text-white hover:bg-red-700"
+          >
+            Try again
+          </button>
+        </div>
       </div>
     );
   }
@@ -47,9 +57,7 @@ export default function InstructorProfilePage() {
       <div className="mb-8 flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Instructor Profile</h1>
-          <p className="mt-1 text-sm text-gray-600">
-            Manage your instructor profile and settings
-          </p>
+          <p className="mt-1 text-sm text-gray-600">Manage your instructor profile and settings</p>
         </div>
         <button
           onClick={() => setIsEditing(!isEditing)}
@@ -59,31 +67,11 @@ export default function InstructorProfilePage() {
         </button>
       </div>
 
-      {/* Instructor Status Badge */}
       <div className="mb-6 rounded-lg border border-blue-200 bg-blue-50 p-4">
-        <div className="flex items-center gap-3">
-          <div className="rounded-full bg-blue-100 p-2">
-            <svg
-              className="h-5 w-5 text-blue-600"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-          </div>
-          <div>
-            <p className="font-medium text-blue-900">Instructor Account</p>
-            <p className="text-sm text-blue-700">
-              Status: {instructorState === 'approved' ? 'Approved' : instructorState}
-            </p>
-          </div>
-        </div>
+        <p className="font-medium text-blue-900">Instructor Account</p>
+        <p className="text-sm text-blue-700">
+          Status: {instructorState === 'approved' ? 'Approved' : (instructorState ?? '—')}
+        </p>
       </div>
 
       <div className="space-y-8">
@@ -92,54 +80,50 @@ export default function InstructorProfilePage() {
         {isEditing ? (
           <ProfileEditForm
             profile={profile}
-            onSave={() => {
-              setIsEditing(false);
-              loadProfile();
-            }}
+            onSave={() => { setIsEditing(false); loadProfile(); }}
             onCancel={() => setIsEditing(false)}
           />
         ) : (
           <>
             <ProfileHeader profile={profile} />
-            
-            {/* Instructor-specific sections */}
+
             <div className="rounded-lg border border-gray-200 bg-white p-6">
               <h2 className="text-lg font-semibold mb-4">Instructor Dashboard</h2>
               <div className="grid gap-4 sm:grid-cols-2">
-                <div className="rounded-md bg-gray-50 p-4">
-                  <p className="text-sm text-gray-600">Total Courses</p>
-                  <p className="mt-1 text-2xl font-bold">0</p>
-                </div>
-                <div className="rounded-md bg-gray-50 p-4">
-                  <p className="text-sm text-gray-600">Total Students</p>
-                  <p className="mt-1 text-2xl font-bold">0</p>
-                </div>
-                <div className="rounded-md bg-gray-50 p-4">
-                  <p className="text-sm text-gray-600">Average Rating</p>
-                  <p className="mt-1 text-2xl font-bold">-</p>
-                </div>
-                <div className="rounded-md bg-gray-50 p-4">
-                  <p className="text-sm text-gray-600">Total Revenue</p>
-                  <p className="mt-1 text-2xl font-bold">₹0</p>
-                </div>
+                {[
+                  { label: 'Total Courses',   value: 0 },
+                  { label: 'Total Students',  value: 0 },
+                  { label: 'Average Rating',  value: '—' },
+                  { label: 'Total Revenue',   value: '₹0' },
+                ].map((stat) => (
+                  <div key={stat.label} className="rounded-md bg-gray-50 p-4">
+                    <p className="text-sm text-gray-600">{stat.label}</p>
+                    <p className="mt-1 text-2xl font-bold">{stat.value}</p>
+                  </div>
+                ))}
               </div>
             </div>
 
             <div className="rounded-lg border border-gray-200 bg-white p-6">
               <h2 className="text-lg font-semibold mb-4">Quick Actions</h2>
               <div className="flex flex-wrap gap-3">
-                <button className="rounded-md bg-[color:var(--color-primary)] px-4 py-2 text-sm text-white hover:opacity-90">
-                  Create New Course
-                </button>
-                <button className="rounded-md border px-4 py-2 text-sm hover:bg-gray-50">
-                  View My Courses
-                </button>
-                <button className="rounded-md border px-4 py-2 text-sm hover:bg-gray-50">
-                  Analytics
-                </button>
-                <button className="rounded-md border px-4 py-2 text-sm hover:bg-gray-50">
-                  Earnings
-                </button>
+                {[
+                  { label: 'Create New Course', primary: true },
+                  { label: 'View My Courses', primary: false },
+                  { label: 'Analytics', primary: false },
+                  { label: 'Earnings', primary: false },
+                ].map(({ label, primary }) => (
+                  <button
+                    key={label}
+                    className={`rounded-md px-4 py-2 text-sm ${
+                      primary
+                        ? 'bg-[color:var(--color-primary)] text-white hover:opacity-90'
+                        : 'border hover:bg-gray-50'
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
               </div>
             </div>
           </>
