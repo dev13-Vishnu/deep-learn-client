@@ -1,6 +1,25 @@
+import { useAuth } from '../../auth/useAuth';
+import { Navigate } from 'react-router-dom';
 import InstructorApplicationForm from './components/InstructorApplicationForm';
 
 export default function InstructorApplyPage() {
+  const { currentRole, instructorState, isHydrating } = useAuth();
+
+  if (isHydrating) {
+    return null;
+  }
+
+  // If instructor with approved status, redirect to dashboard
+  if (currentRole === 'instructor' && instructorState === 'approved') {
+    return <Navigate to="/instructor/dashboard" replace />;
+  }
+
+  // If instructor with pending/rejected status, redirect to status page
+  if (currentRole === 'instructor' && (instructorState === 'pending' || instructorState === 'rejected')) {
+    return <Navigate to="/instructor/status" replace />;
+  }
+
+  // Allow students or instructors with 'not_applied' status
   return (
     <div className="mx-auto max-w-3xl px-6 py-12">
       <h1 className="text-2xl font-semibold">
@@ -8,7 +27,7 @@ export default function InstructorApplyPage() {
       </h1>
 
       <p className="mt-2 text-sm text-[color:var(--color-muted)]">
-        Share your experience and tell us what you’d like to teach.
+        Share your experience and tell us what you'd like to teach.
       </p>
 
       <div className="mt-8">

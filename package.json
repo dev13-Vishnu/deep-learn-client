@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "dev:tunnel": "vite --mode tunnel",
+  "build": "tsc -b && vite build",
     "preview": "vite preview"
   },
   "dependencies": {

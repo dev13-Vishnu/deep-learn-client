@@ -9,9 +9,7 @@ export interface InstructorApplicationPayload {
   language: string;
 }
 
-export async function applyForInstructor(
-  payload: InstructorApplicationPayload
-) {
+export async function applyForInstructor(payload: InstructorApplicationPayload) {
   const { data } = await apiClient.post('/instructor/apply', payload);
   return data;
 }

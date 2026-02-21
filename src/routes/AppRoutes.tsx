@@ -1,6 +1,8 @@
 import { Routes, Route } from 'react-router-dom';
+
 import ProtectedRoute from './ProtectedRoute';
 import GuestRoute from './GuestRoute';
+import AdminRoute from './AdminRoute';
 
 import AppLayout from '../layouts/AppLayout';
 
@@ -9,104 +11,134 @@ import Signup from '../auth/pages/Signup';
 import ForgotPassword from '../auth/pages/ForgotPassword';
 import OtpVerification from '../auth/pages/OtpVerification';
 import ResetPassword from '../auth/pages/ResetPassword';
+
 import LandingPage from '../pages/landing/LandingPage';
-import DashboardHome from '../pages/dashboard/DashboardHome';
+
 import InstructorApplyPage from '../pages/instructor/InstructorApplyPage';
 import InstructorStatusPage from '../pages/instructor/InstructorStatusPage';
 import InstructorDashboardPage from '../pages/instructor/InstructorDashboardPage';
-import AdminLoginPage from '../pages/admin/AdminLoginPage';
-import AdminRoute from './AdminRoute';
+
 import AdminDashboardPage from '../pages/admin/AdminDashBoardPage';
 
-// function DashboardPage() {
-//   return <h1> Protected Dashboard</h1>;
-// }
+import { RequireInstructorState, RequireRole} from '../auth/guards';
+import HomePage from '../pages/home/HomePage';
+import ProfilePage from '../pages/profile/ProfilePage';
+import OAuthCallbackPage from '../auth/pages/OAuthCallbackPage';
+
+
 
 export default function AppRoutes() {
   return (
     <Routes>
+      {/* ----------------- Guest Routes ----------------- */}
       <Route
-  path="/login"
-  element={
-    <GuestRoute>
-      <Login />
-    </GuestRoute>
-  }
-/>
+        path="/login"
+        element={
+          <GuestRoute>
+            <Login />
+          </GuestRoute>
+        }
+      />
 
-<Route
-  path="/signup"
-  element={
-    <GuestRoute>
-      <Signup />
-    </GuestRoute>
-  }
-/>
+      <Route
+        path="/signup"
+        element={
+          <GuestRoute>
+            <Signup />
+          </GuestRoute>
+        }
+      />
 
-<Route
-  path="/forgot-password"
-  element={
-    <GuestRoute>
-      <ForgotPassword />
-    </GuestRoute>
-  }
-/>
+      <Route
+        path="/forgot-password"
+        element={
+          <GuestRoute>
+            <ForgotPassword />
+          </GuestRoute>
+        }
+      />
+
       <Route path="/verify-otp" element={<OtpVerification />} />
       <Route path="/reset-password" element={<ResetPassword />} />
 
-<Route element = {<AppLayout/>}>
-  <Route path='/' element= {<LandingPage/>}/>
-  <Route
-    path="/dashboard"
-      element={
-        <ProtectedRoute>
-          <DashboardHome/>
-        </ProtectedRoute>
-      }
-  />
-  <Route
-    path="/instructor/apply"
-    element={
-      <ProtectedRoute>
-        <InstructorApplyPage />
-      </ProtectedRoute>
-    }
-  />
-  <Route
-  path="/instructor/status"
-  element={
-    <ProtectedRoute>
-      <InstructorStatusPage />
-    </ProtectedRoute>
-  }
-/>
+      {/* ----------------- App Layout ----------------- */}
+      <Route element={<AppLayout />}>
+        {/* Public */}
+        <Route path="/" element={<LandingPage />} />
 
-<Route
-  path="/instructor/dashboard"
-  element={
-    <ProtectedRoute>
-      <InstructorDashboardPage />
-    </ProtectedRoute>
-  }
-/>
+        {/* ----------------- Student Routes ----------------- */}
+        
+        <Route
+          path="/home"
+          element={
+            <ProtectedRoute>
+              <RequireRole allowed={['student']}>
+                <HomePage />
+              </RequireRole>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <ProfilePage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* ----------------- Instructor Routes ----------------- */}
+        <Route
+          path="/instructor/apply"
+          element={
+            <ProtectedRoute>
+              {/* <RequireRole allowed={['student']}> */}
+                <InstructorApplyPage />
+              {/* </RequireRole> */}
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/instructor/status"
+          element={
+            <ProtectedRoute>
+              {/* <RequireRole allowed={['student', 'instructor']}> */}
+                <InstructorStatusPage />
+              {/* </RequireRole> */}
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/instructor/dashboard"
+          element={
+            <ProtectedRoute>
+              <RequireRole allowed={['instructor']}>
+                <RequireInstructorState>
+                  <InstructorDashboardPage />
+                </RequireInstructorState>
+              </RequireRole>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* ----------------- Admin Routes ----------------- */}
+        {/* <Route path="/admin/login" element={<AdminLoginPage />} /> */}
+
+        <Route
+          path="/admin"
+          element={
+            <AdminRoute>
+              <AdminDashboardPage />
+            </AdminRoute>
+          }
+        />
+      <Route path="/auth/callback" element={<OAuthCallbackPage />} />
+      </Route>
 
 
-//admin
-
-<Route path="/admin/login" element={<AdminLoginPage />} />
-
-<Route
-  path="/admin"
-  element={
-    <AdminRoute>
-      <AdminDashboardPage />
-    </AdminRoute>
-  }
-/>
-
-  
-</Route>
-  
     </Routes>
   );
 }

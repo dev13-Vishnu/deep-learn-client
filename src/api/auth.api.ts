@@ -13,6 +13,8 @@ export const authApi = {
     email: string;
     otp: string;
     password: string;
+    firstName: string;
+    lastName: string;
   }) {
     return apiClient.post('/auth/signup', data);
   },
@@ -54,6 +56,9 @@ logout() {
   return apiClient.post('/auth/logout');
 },
 
+getOAuthRedirectUrl(provider: 'google' | 'facebook' | 'microsoft'): string {
+  return `${import.meta.env.VITE_API_BASE_URL}/auth/oauth/${provider}`
+}
 
 
 

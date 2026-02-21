@@ -5,12 +5,14 @@ interface Props {
     isAuthenticated: boolean;
     user: any | null;
     onLogout: () => Promise<void>;
+    role: 'student' | 'instructor' | 'admin' | null;
 }
 
 export default function NavbarActions ({
     isAuthenticated,
     user,
     onLogout,
+    role,
 }:Props) {
     const navigate = useNavigate();
 
@@ -18,7 +20,7 @@ export default function NavbarActions ({
         return (
             <div className="flex items-center gap-3">
                 <button
-                    onClick={()=> navigate('login')}
+                    onClick={()=> navigate('/login')}
                     className="rounded-md border px-4 py-2 text-sm"
                 >
                     Login
@@ -36,7 +38,18 @@ export default function NavbarActions ({
         <div className="flex items-center gap-4">
             {/* Placeholder icons */}
             <button className="text-sm">🔔</button>
-            <button className="tex-sm">🛒</button>
+
+            {/* Cart : Student-only  */}
+            {role === "student" && (
+                <button
+                    type="button"
+                    className="tex-sm"
+                    aria-label= "Cart"
+                >
+                    🛒
+                </button>
+            )}
+            
 
             <NavbarProfileMenu user={user} onLogout = {onLogout} />
         </div>
