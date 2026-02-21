@@ -1,5 +1,12 @@
 import apiClient from './axios';
 
+export interface InstructorApplicationApplicant {
+  firstName: string | null;
+  lastName: string | null;
+  email: string;
+  avatarUrl: string | null;
+}
+
 export interface InstructorApplication {
   id: string;
   userId: string;
@@ -14,6 +21,8 @@ export interface InstructorApplication {
   cooldownExpiresAt: string | null;
   createdAt: string;
   updatedAt: string;
+  /** Applicant's user profile — populated by the server, null if user was deleted */
+  applicant: InstructorApplicationApplicant | null;
 }
 
 export interface ListApplicationsResponse {

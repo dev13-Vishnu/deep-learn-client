@@ -13,7 +13,6 @@ export default function InstructorApplicationsTab() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
-  // Global notifications — no local Toast needed
   const {
     approveTarget,
     rejectTarget,
@@ -23,7 +22,7 @@ export default function InstructorApplicationsTab() {
     closeModals,
     confirmApprove,
     confirmReject,
-  } = useApplicationActions();   // ← no argument
+  } = useApplicationActions();
 
   const loadApplications = useCallback(async () => {
     setLoading(true);
@@ -36,7 +35,7 @@ export default function InstructorApplicationsTab() {
       setApplications(data.applications);
       setTotalPages(data.pagination.totalPages);
     } catch {
-      // Error is surfaced via the global toast from the API layer
+      // Error surfaced via global toast from the API layer
     } finally {
       setLoading(false);
     }
@@ -44,7 +43,6 @@ export default function InstructorApplicationsTab() {
 
   useEffect(() => { loadApplications(); }, [loadApplications]);
 
-  // Optimistic removal — removes the card immediately when filter is 'pending'
   function optimisticRemove(id: string) {
     if (filter === 'pending') {
       setApplications((prev) => prev.filter((a) => a.id !== id));
@@ -64,7 +62,7 @@ export default function InstructorApplicationsTab() {
   return (
     <>
       <div>
-        {/* Filter bar */}
+        {/* Filter tabs */}
         <div className="mb-6 flex gap-3">
           {(['all', 'pending', 'approved', 'rejected'] as StatusFilter[]).map((s) => (
             <button
@@ -81,7 +79,6 @@ export default function InstructorApplicationsTab() {
           ))}
         </div>
 
-        {/* Application list */}
         {applications.length === 0 ? (
           <div className="rounded-lg bg-gray-50 py-14 text-center">
             <p className="text-gray-500">No applications found.</p>
@@ -99,7 +96,6 @@ export default function InstructorApplicationsTab() {
           </div>
         )}
 
-        {/* Pagination */}
         {totalPages > 1 && (
           <div className="mt-8 flex justify-center gap-2">
             <button
@@ -138,20 +134,53 @@ export default function InstructorApplicationsTab() {
           onCancel={closeModals}
         />
       )}
-
-      {/* No local <Toast> here — global NotificationProvider handles it */}
     </>
   );
 }
 
-// ── ApplicationCard (inlined — avoids a separate file change) ─────────────────
+// ── ApplicationCard ────────────────────────────────────────────────────────────
+
 interface CardProps {
   application: InstructorApplication;
   onApprove: (app: InstructorApplication) => void;
   onReject: (app: InstructorApplication) => void;
 }
 
+function ApplicantAvatar({
+  avatarUrl,
+  firstName,
+  email,
+}: {
+  avatarUrl: string | null;
+  firstName: string | null;
+  email: string;
+}) {
+  const initial = (firstName?.[0] ?? email[0]).toUpperCase();
+
+  if (avatarUrl) {
+    return (
+      <img
+        src={avatarUrl}
+        alt={firstName ?? email}
+        className="h-10 w-10 rounded-full object-cover shrink-0"
+      />
+    );
+  }
+
+  return (
+    <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center shrink-0">
+      <span className="text-sm font-semibold text-gray-500">{initial}</span>
+    </div>
+  );
+}
+
 function ApplicationCard({ application, onApprove, onReject }: CardProps) {
+  const { applicant } = application;
+
+  const displayName = applicant
+    ? [applicant.firstName, applicant.lastName].filter(Boolean).join(' ') || applicant.email
+    : `User ${application.userId.slice(-6)}`;
+
   const cooldownDate = application.cooldownExpiresAt
     ? new Date(application.cooldownExpiresAt)
     : null;
@@ -159,9 +188,24 @@ function ApplicationCard({ application, onApprove, onReject }: CardProps) {
 
   return (
     <div className="rounded-lg border border-gray-200 bg-white p-5">
+      {/* ── Applicant header ──────────────────────────────────────────────── */}
       <div className="flex items-start justify-between gap-4">
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-3 flex-1 min-w-0">
+          <ApplicantAvatar
+            avatarUrl={applicant?.avatarUrl ?? null}
+            firstName={applicant?.firstName ?? null}
+            email={applicant?.email ?? application.userId}
+          />
+
+          <div className="min-w-0">
+            <p className="font-medium text-gray-900 truncate">{displayName}</p>
+            {applicant && (
+              <p className="text-xs text-gray-500 truncate">{applicant.email}</p>
+            )}
+          </div>
+
+          {/* Status + cooldown badges */}
+          <div className="flex items-center gap-2 flex-wrap shrink-0 ml-2">
             <span
               className={`rounded-full px-2 py-0.5 text-xs font-medium capitalize ${
                 application.status === 'pending'
@@ -179,22 +223,10 @@ function ApplicationCard({ application, onApprove, onReject }: CardProps) {
                 Cooldown until {cooldownDate.toLocaleDateString()}
               </span>
             )}
-
-            <span className="text-xs text-gray-400">
-              #{application.id.slice(-6)}
-            </span>
-          </div>
-
-          <p className="mt-2 text-sm text-gray-600 line-clamp-2">{application.bio}</p>
-
-          <div className="mt-2 flex flex-wrap gap-3 text-xs text-gray-500">
-            <span>Experience: {application.experienceYears} yrs</span>
-            <span>Level: {application.level}</span>
-            <span>Language: {application.language}</span>
           </div>
         </div>
 
-        {/* Action buttons — only shown for pending applications */}
+        {/* Action buttons */}
         {application.status === 'pending' && (
           <div className="flex shrink-0 gap-2">
             <button
@@ -211,6 +243,20 @@ function ApplicationCard({ application, onApprove, onReject }: CardProps) {
             </button>
           </div>
         )}
+      </div>
+
+      {/* ── Application details ───────────────────────────────────────────── */}
+      <div className="mt-4 border-t border-gray-100 pt-4">
+        <p className="text-sm text-gray-600 line-clamp-2">{application.bio}</p>
+
+        <div className="mt-2 flex flex-wrap gap-3 text-xs text-gray-500">
+          <span>Experience: {application.experienceYears} yrs</span>
+          <span>Level: {application.level}</span>
+          <span>Language: {application.language}</span>
+          <span className="ml-auto text-gray-400">
+            #{application.id.slice(-6)} · {new Date(application.createdAt).toLocaleDateString()}
+          </span>
+        </div>
       </div>
 
       {application.rejectionReason && (
