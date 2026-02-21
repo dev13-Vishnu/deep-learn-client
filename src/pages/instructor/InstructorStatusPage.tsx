@@ -28,13 +28,14 @@ export default function InstructorStatusPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+
   async function loadStatus() {
     setLoading(true);
     setError(null);
     try {
       const data = await getInstructorStatus();
-      setStatus(data.status);
-    } catch (err: any) {
+      setStatus(data);
+        } catch (err: any) {
       setError(err?.response?.data?.message || 'Failed to load application status.');
     } finally {
       setLoading(false);
