@@ -1,43 +1,52 @@
 import { useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useAppDispatch } from '../../store/hooks';
+import { setFullAuth } from '../../store/auth/authSlice';
 import { tokenStorage } from '../../storage/token.storage';
+import { roleContextStorage } from '../../storage/roleContext.storage';
 import { authApi } from '../../api/auth.api';
-import type { RoleContext } from '../auth.context';
+import type { RoleContext } from '../../store/auth/authSlice';
 import { getAuthHomePath } from '../navigation/getAuthHomePath';
+
+
+function toRoleContext(role: any): RoleContext {
+  if (role === 1 || role === 'instructor') return 'instructor';
+  if (role === 2 || role === 'admin') return 'admin';
+  return 'student'; 
+}
 
 export default function OAuthCallbackPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const processed = useRef(false); // Prevent double-run in React StrictMode
+  const dispatch = useAppDispatch();
+  const processed = useRef(false);
 
   useEffect(() => {
     if (processed.current) return;
     processed.current = true;
 
     const token = searchParams.get('token');
-    const redirectTo = searchParams.get('redirect'); // backend sends '/dashboard' or '/onboarding'
 
     if (!token) {
-      // No token = something went wrong on the backend
       navigate('/login?error=oauth_failed', { replace: true });
       return;
     }
 
-    // 1. Save the access token
     tokenStorage.set(token);
-
-    // 2. Immediately clear token from URL (security: don't leave it in browser history)
     window.history.replaceState({}, '', window.location.pathname);
 
-    // 3. Fetch current user to get role + instructor state
     authApi.me()
       .then((response) => {
         const userData = response.data.user;
 
-        // If backend sends redirectTo, use it; otherwise compute from role
-        const finalPath = redirectTo || getAuthHomePath(
+        const roleContext = toRoleContext(userData.role);
+
+        roleContextStorage.set(roleContext);
+        dispatch(setFullAuth({ user: userData, roleContext }));
+
+        const finalPath = getAuthHomePath(
           true,
-          userData.role as RoleContext,
+          roleContext,
           userData.instructorState ?? null
         );
 
@@ -45,11 +54,10 @@ export default function OAuthCallbackPage() {
       })
       .catch((error) => {
         console.error('Failed to fetch user after OAuth:', error);
-        // Token might be invalid; clear and redirect to login
         tokenStorage.clear();
         navigate('/login?error=oauth_invalid', { replace: true });
       });
-  }, [searchParams, navigate]);
+  }, [searchParams, navigate, dispatch]);
 
   return (
     <div style={{
@@ -58,23 +66,18 @@ export default function OAuthCallbackPage() {
       justifyContent: 'center',
       height: '100vh',
       flexDirection: 'column',
-      gap: '1rem'
+      gap: '12px',
     }}>
-      <div style={{ 
-        width: '50px', 
-        height: '50px', 
-        border: '5px solid #f3f3f3',
-        borderTop: '5px solid #000',
+      <div style={{
+        width: 32,
+        height: 32,
+        border: '3px solid #e5e7eb',
+        borderTopColor: '#6366f1',
         borderRadius: '50%',
-        animation: 'spin 1s linear infinite'
+        animation: 'spin 0.8s linear infinite',
       }} />
-      <p>Completing sign-in…</p>
-      <style>{`
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-      `}</style>
+      <p style={{ color: '#6b7280', fontSize: 14 }}>Signing you in…</p>
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 }

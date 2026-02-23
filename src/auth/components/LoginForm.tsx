@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../useAuth';
-import type { RoleContext } from '../auth.context';
 import { getAuthHomePath } from '../navigation/getAuthHomePath';
 import { useOAuth } from '../hooks/useOAuth';
 import { useNotify } from '../../notifications/useNotify';
 import { FieldError } from '../../components/FieldError';
 import { validateEmail, validatePassword } from '../../utils/validation';
+import type { RoleContext } from '../../store/auth/authSlice';
 
 export default function LoginForm() {
   const { login } = useAuth();
@@ -24,9 +24,7 @@ export default function LoginForm() {
 
   function validateAll(): boolean {
     const eErr = validateEmail(email);
-    // Use validatePassword so strength rules are checked before the network call.
-    // A user with a weak password will get a clear message instead of a cryptic
-    // 401 from the server.
+
     const pErr = validatePassword(password);
     setEmailError(eErr);
     setPasswordError(pErr);
@@ -40,7 +38,6 @@ export default function LoginForm() {
     setLoading(true);
     try {
       const userData = await login(email, password, role);
-      // userData.instructorState is now returned by the server (LoginUserUseCase fix)
       const homePath = getAuthHomePath(true, role, userData.instructorState ?? null);
       navigate(homePath, { replace: true });
     } catch (err: any) {

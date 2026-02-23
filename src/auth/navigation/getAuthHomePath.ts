@@ -1,4 +1,4 @@
-import type { RoleContext } from "../auth.context";
+import type { RoleContext } from "../../store/auth/authSlice";
 import type { InstructorState } from "../types";
 
 export function getAuthHomePath(
@@ -15,7 +15,6 @@ export function getAuthHomePath(
     }
 
     if (role === 'instructor') {
-        // Route based on application status
         if (!instructorState || instructorState === 'not_applied') {
             return '/instructor/apply';
         }
@@ -23,12 +22,12 @@ export function getAuthHomePath(
             return '/instructor/status';
         }
         if (instructorState === 'rejected') {
-            return '/instructor/status';  // Can reapply from status page
+            return '/instructor/status';
         }
         if (instructorState === 'approved') {
             return '/instructor/dashboard';
         }
     }
 
-    return '/home';  // student default
+    return '/home';
 }

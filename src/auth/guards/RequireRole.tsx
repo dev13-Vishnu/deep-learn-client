@@ -1,7 +1,7 @@
 import { Navigate } from "react-router-dom";
-import type { RoleContext } from "../auth.context";
 import { useAuth } from "../useAuth";
 import type { JSX } from "react";
+import type { RoleContext } from "../../store/auth/authSlice";
 
 interface RequireRoleProps {
     allowed: RoleContext[];
@@ -19,7 +19,6 @@ export default function RequireRole({
     }
 
     if(!currentRole || !allowed.includes(currentRole)) {
-        // Role isolation: force re-login
         return <Navigate to="/login" replace />
     }
 

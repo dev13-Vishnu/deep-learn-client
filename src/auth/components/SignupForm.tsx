@@ -9,6 +9,7 @@ import {
   validateConfirmPassword,
   validateName,
 } from '../../utils/validation';
+import { useOAuth } from '../hooks/useOAuth';
 
 type FormErrors = {
   firstName: string | null;
@@ -36,7 +37,8 @@ export default function SignupForm() {
   const navigate = useNavigate();
   const notify = useNotify();
 
-  // Validate a single field and update its error
+  const { handleOAuthLogin, isLoading: oauthLoading } = useOAuth();
+
   function touch(field: keyof FormErrors, value: string) {
     setErrors((prev) => ({ ...prev, [field]: getFieldError(field, value) }));
   }
@@ -153,7 +155,6 @@ export default function SignupForm() {
           onChange={(e) => {
             setPassword(e.target.value);
             if (errors.password) touch('password', e.target.value);
-            // Re-validate confirm if it was already touched
             if (errors.confirmPassword)
               setErrors((prev) => ({
                 ...prev,
@@ -207,6 +208,8 @@ export default function SignupForm() {
       <div className="flex gap-3">
         <button
           type="button"
+          onClick={() => handleOAuthLogin('google')}
+          disabled={loading || oauthLoading}
           className="flex-1 border border-[color:var(--color-border)] bg-white py-2"
         >
           Google
