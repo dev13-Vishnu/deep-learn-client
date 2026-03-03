@@ -1,5 +1,3 @@
-
-
 export const CourseStatus = {
   Draft:     'draft',
   Published: 'published',
@@ -11,20 +9,21 @@ export const CourseLevel = {
   Beginner:     'beginner',
   Intermediate: 'intermediate',
   Advanced:     'advanced',
+  All:          'all',
 } as const;
 export type CourseLevel = (typeof CourseLevel)[keyof typeof CourseLevel];
+
+export type CourseCategory =
+  | 'development' | 'design'    | 'business' | 'marketing'
+  | 'photography' | 'music'     | 'health'   | 'other';
+
 export interface ChapterDTO {
   _id:      string;
   title:    string;
   type:     'video' | 'text';
   isFree:   boolean;
-  duration: number;          
-  /**
-   * null when chapter is locked and the caller is not enrolled.
-   * Present for free chapters and tutor-owned courses.
-   */
+  duration: number;
   content:  string | null;
-  /** null when locked — same gating rule as content */
   video:    string | null;
   order:    number;
 }
@@ -48,23 +47,24 @@ export interface ThumbnailDTO {
   key: string;
 }
 
-
-/** Lightweight row — used in paginated list responses */
 export interface CourseListItemDTO {
   _id:         string;
   title:       string;
+  subtitle:    string | null;
   description: string;
   tutorId:     string;
   status:      CourseStatus;
   level:       CourseLevel;
+  category:    CourseCategory;
+  language:    string;
   tags:        string[];
   price:       number;
+  currency:    string;
   thumbnail:   ThumbnailDTO | null;
   createdAt:   string;
   updatedAt:   string;
 }
 
-/** Full detail — includes complete module/lesson/chapter tree */
 export interface CourseDetailDTO extends CourseListItemDTO {
   modules: ModuleDTO[];
 }
@@ -97,19 +97,26 @@ export interface ListTutorCoursesParams {
 }
 
 export interface CreateCoursePayload {
-  title:        string;
-  description:  string;
-  level:        CourseLevel;
-  tags?:        string[];
-  price:        number;
+  title:       string;
+  subtitle?:   string | null;
+  description: string;
+  category:    CourseCategory;
+  level:       CourseLevel;
+  language:    string;
+  price?:      number;
+  currency?:   string;
+  tags?:       string[];
 }
 
 export interface UpdateCoursePayload {
   title?:       string;
+  subtitle?:    string | null;
   description?: string;
+  category?:    CourseCategory;
   level?:       CourseLevel;
-  tags?:        string[];
+  language?:    string;
   price?:       number;
+  tags?:        string[];
 }
 
 export interface ThumbnailUploadUrlDTO {

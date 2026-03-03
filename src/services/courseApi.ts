@@ -63,7 +63,7 @@ export async function getMyCourses(
 
 export async function getMyCourse(courseId: string): Promise<CourseDetailDTO> {
   const { data } = await apiClient.get(`/courses/my/${courseId}`);
-  return data.data;
+  return data.data ?? { data: [], total: 0, page: 1, limit: 9, totalPages: 0 };
 }
 
 export async function createCourse(
