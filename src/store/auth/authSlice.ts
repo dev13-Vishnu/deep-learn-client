@@ -131,6 +131,8 @@ const authSlice = createSlice({
       state.user            = null;
       state.isAuthenticated = false;
       state.isHydrating     = false;
+      state.currentRole = null;
+      state.instructorState = null;
     });
 
     builder.addCase(loginUser.fulfilled, (state, action) => {

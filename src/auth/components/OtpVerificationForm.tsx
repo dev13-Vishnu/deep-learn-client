@@ -1,14 +1,26 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { authApi } from '../../api/auth.api';
-import { useAuth } from '../useAuth';
+import { useAppDispatch } from '../../store/hooks';
+import { setFullAuth } from '../../store/auth/authSlice';
+import { roleContextStorage } from '../../storage/roleContext.storage';
+import { tokenStorage } from '../../storage/token.storage';
 import { getAuthHomePath } from '../navigation/getAuthHomePath';
 import { useNotify } from '../../notifications/useNotify';
 
+const TIMER_KEY = 'otpTimerExpiry';
+
+function getRemainingSeconds(): number {
+  const stored = sessionStorage.getItem(TIMER_KEY);
+  if (!stored) return 0;
+  return Math.max(0, Math.round((Number(stored) - Date.now()) / 1000));
+}
+
 export default function OtpVerificationForm() {
-  const navigate = useNavigate();
-  const { authenticateWithToken } = useAuth();
-  const notify = useNotify();
+  const navigate  = useNavigate();
+  const dispatch  = useAppDispatch();
+  const notify    = useNotify();
+  const location  = useLocation();
 
   const [signupData, setSignupData] = useState<{
     email: string;
@@ -18,47 +30,65 @@ export default function OtpVerificationForm() {
     lastName: string;
   } | null>(null);
 
-  const [otp, setOtp] = useState<string[]>(Array(6).fill(''));
+  const [otp, setOtp]         = useState<string[]>(Array(6).fill(''));
   const [loading, setLoading] = useState(false);
-  const [timer, setTimer] = useState(60);
-  // Only used for submission errors rendered inline (below the OTP boxes)
-  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [timer, setTimer]     = useState(getRemainingSeconds);
 
-  const inputsRef = useRef<Array<HTMLInputElement | null>>([]);
-  const location = useLocation();
+  const inputsRef   = useRef<Array<HTMLInputElement | null>>([]);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const purpose: 'signup' | 'forgot-password' | undefined = location.state?.purpose;
 
+  // ── Load signup payload ───────────────────────────────────────────────────
   useEffect(() => {
     if (purpose === 'signup') {
       const stored = sessionStorage.getItem('signupPayload');
-      if (!stored) {
-        navigate('/signup', { replace: true });
-        return;
-      }
+      if (!stored) { navigate('/signup', { replace: true }); return; }
       setSignupData(JSON.parse(stored));
       return;
     }
-
     if (purpose === 'forgot-password') {
       const emailFromState = location.state?.email;
-      if (!emailFromState) {
-        navigate('/forgot-password', { replace: true });
-        return;
-      }
+      if (!emailFromState) { navigate('/forgot-password', { replace: true }); return; }
       setSignupData({ email: emailFromState, password: '', role: '', firstName: '', lastName: '' });
       return;
     }
-
     navigate('/login', { replace: true });
   }, [purpose, location.state, navigate]);
 
-  // Countdown
+  // ── Timer — persists across refresh via sessionStorage ───────────────────
+  const startInterval = () => {
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    intervalRef.current = setInterval(() => {
+      const remaining = getRemainingSeconds();
+      setTimer(remaining);
+      if (remaining <= 0) {
+        clearInterval(intervalRef.current!);
+        intervalRef.current = null;
+        sessionStorage.removeItem(TIMER_KEY);
+      }
+    }, 1000);
+  };
+
+  const startTimer = (seconds: number) => {
+    sessionStorage.setItem(TIMER_KEY, String(Date.now() + seconds * 1000));
+    setTimer(seconds);
+    startInterval();
+  };
+
   useEffect(() => {
-    if (timer === 0) return;
-    const interval = setInterval(() => setTimer((t) => t - 1), 1000);
-    return () => clearInterval(interval);
-  }, [timer]);
+    const remaining = getRemainingSeconds();
+    if (remaining > 0) {
+      // Resume existing timer after refresh
+      setTimer(remaining);
+      startInterval();
+    } 
+    else {
+      // First visit — start fresh
+      startTimer(60);
+    }
+    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
+  }, []);
 
   if (!signupData) return null;
 
@@ -69,6 +99,7 @@ export default function OtpVerificationForm() {
     (_, a, b, c) => `${a}${'*'.repeat(b.length)}${c}`
   );
 
+  // ── OTP input handlers ────────────────────────────────────────────────────
   const handleChange = (index: number, value: string) => {
     if (!/^\d?$/.test(value)) return;
     const newOtp = [...otp];
@@ -83,25 +114,24 @@ export default function OtpVerificationForm() {
     }
   };
 
+  // ── Resend ────────────────────────────────────────────────────────────────
   const handleResendOtp = async () => {
-    if (!signupData) return;
     try {
       await authApi.requestOtp({
-        email: signupData.email,
+        email,
         purpose: purpose === 'signup' ? 'signup' : 'forgot-password',
       });
-      setTimer(60);
       setOtp(Array(6).fill(''));
-      setSubmitError(null);
+      startTimer(60);
       notify('A new code has been sent to your email.', 'success');
     } catch (err: any) {
       notify(err?.response?.data?.message || 'Failed to resend code. Try again.', 'error');
     }
   };
 
+  // ── Submit ────────────────────────────────────────────────────────────────
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitError(null);
     setLoading(true);
 
     try {
@@ -113,19 +143,29 @@ export default function OtpVerificationForm() {
           firstName,
           lastName,
         });
-        const { accessToken } = response.data;
-        authenticateWithToken(accessToken);
+
+        const { accessToken, user } = response.data;
+
+        tokenStorage.set(accessToken);
+        roleContextStorage.set('student');
+        dispatch(setFullAuth({ user, roleContext: 'student' }));
+
+        sessionStorage.removeItem('signupPayload');
+        sessionStorage.removeItem(TIMER_KEY);
         navigate(getAuthHomePath(true, 'student'), { replace: true });
         return;
       }
 
       if (purpose === 'forgot-password') {
         await authApi.verifyPasswordResetOtp({ email, otp: otp.join('') });
+        sessionStorage.removeItem(TIMER_KEY);
         navigate('/reset-password', { state: { email }, replace: true });
         return;
       }
     } catch (err: any) {
-      setSubmitError(err?.response?.data?.message || 'Verification failed. Please try again.');
+      notify(err?.response?.data?.message || 'Verification failed. Please try again.', 'error');
+      setOtp(Array(6).fill(''));
+      inputsRef.current[0]?.focus();
     } finally {
       setLoading(false);
     }
@@ -138,12 +178,6 @@ export default function OtpVerificationForm() {
       <p className="mb-6 text-sm text-[color:var(--color-muted)]">
         Enter the 6-digit code sent to <strong>{maskedEmail}</strong>
       </p>
-
-      {submitError && (
-        <p className="mb-4 text-sm text-[color:var(--color-danger)]" role="alert">
-          {submitError}
-        </p>
-      )}
 
       <div className="mb-6 flex justify-between gap-2">
         {otp.map((digit, index) => (

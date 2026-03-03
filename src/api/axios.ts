@@ -4,7 +4,7 @@ import { tokenStorage } from '../storage/token.storage';
 
 const apiClient = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
-  withCredentials: true, // IMPORTANT: send refresh cookie
+  withCredentials: true,
 });
 
 // --------------------
@@ -39,9 +39,17 @@ apiClient.interceptors.response.use(
   async (error: AxiosError) => {
     const originalRequest: any = error.config;
 
+    // Only attempt a token refresh if the original request was authenticated
+    // (had a Bearer token). Unauthenticated endpoints like /auth/login,
+    // /auth/signup, /auth/verify-otp etc. all legitimately return 401 —
+    // trying to refresh on those swallows the real error message and prevents
+    // the form from showing it to the user.
+    const hadToken = !!originalRequest?.headers?.Authorization;
+
     if (
       error.response?.status === 401 &&
-      !originalRequest._retry
+      !originalRequest._retry &&
+      hadToken
     ) {
       originalRequest._retry = true;
 
@@ -55,7 +63,7 @@ apiClient.interceptors.response.use(
       }
 
       isRefreshing = true;
-      
+
       try {
         const res = await apiClient.post('/auth/refresh');
         const newAccessToken = res.data.accessToken;
