@@ -1,17 +1,18 @@
 
 
-export enum CourseStatus {
-  Draft     = 'draft',
-  Published = 'published',
-  Archived  = 'archived',
-}
+export const CourseStatus = {
+  Draft:     'draft',
+  Published: 'published',
+  Archived:  'archived',
+} as const;
+export type CourseStatus = (typeof CourseStatus)[keyof typeof CourseStatus];
 
-export enum CourseLevel {
-  Beginner     = 'beginner',
-  Intermediate = 'intermediate',
-  Advanced     = 'advanced',
-}
-
+export const CourseLevel = {
+  Beginner:     'beginner',
+  Intermediate: 'intermediate',
+  Advanced:     'advanced',
+} as const;
+export type CourseLevel = (typeof CourseLevel)[keyof typeof CourseLevel];
 export interface ChapterDTO {
   _id:      string;
   title:    string;
