@@ -17,84 +17,193 @@ export type CourseCategory =
   | 'development' | 'design'    | 'business' | 'marketing'
   | 'photography' | 'music'     | 'health'   | 'other';
 
+// Shared nested DTOs (used by both tutor and public views)
+
+export interface VideoMetadataDTO {
+  s3Key:      string;
+  url:        string;
+  size:       number;
+  mimeType:   string;
+  duration:   number;
+  status:     'uploading' | 'ready' | 'failed';
+  uploadedAt: string;
+}
+
 export interface ChapterDTO {
-  _id:      string;
+  id:       string;
   title:    string;
-  type:     'video' | 'text';
-  isFree:   boolean;
-  duration: number;
-  content:  string | null;
-  video:    string | null;
   order:    number;
+  type:     'video' | 'text';
+  duration: number;
+  isFree:   boolean;
+  content:  string | null;
+  video:    VideoMetadataDTO | null;
 }
 
 export interface LessonDTO {
-  _id:      string;
-  title:    string;
-  order:    number;
-  chapters: ChapterDTO[];
+  id:          string;
+  title:       string;
+  description: string | null;
+  order:       number;
+  isPreview:   boolean;
+  duration:    number;
+  chapters:    ChapterDTO[];
 }
 
 export interface ModuleDTO {
-  _id:     string;
-  title:   string;
-  order:   number;
-  lessons: LessonDTO[];
-}
-
-export interface ThumbnailDTO {
-  url: string;
-  key: string;
-}
-
-export interface CourseListItemDTO {
-  _id:         string;
+  id:          string;
   title:       string;
-  subtitle:    string | null;
-  description: string;
-  tutorId:     string;
-  status:      CourseStatus;
-  level:       CourseLevel;
-  category:    CourseCategory;
-  language:    string;
-  tags:        string[];
-  price:       number;
-  currency:    string;
-  thumbnail:   ThumbnailDTO | null;
-  createdAt:   string;
-  updatedAt:   string;
+  description: string | null;
+  order:       number;
+  duration:    number;
+  lessons:     LessonDTO[];
 }
 
-export interface CourseDetailDTO extends CourseListItemDTO {
+// Tutor / Instructor DTOs
+export interface TutorCourseListItemDTO {
+  id:              string;
+  title:           string;
+  /** URL string (or null). NOT a { url, key } object. */
+  thumbnail:       string | null;
+  status:          CourseStatus;
+  level:           CourseLevel;
+  category:        CourseCategory;
+  totalDuration:   number;
+  enrollmentCount: number;
+  updatedAt:       string;
+  publishedAt:     string | null;
+}
+
+
+export interface CourseBasicDTO {
+  id:              string;
+  tutorId:         string;
+  title:           string;
+  subtitle:        string | null;
+  description:     string;
+  /** URL string (or null). */
+  thumbnail:       string | null;
+  category:        CourseCategory;
+  level:           CourseLevel;
+  language:        string;
+  price:           number;
+  currency:        string;
+  tags:            string[];
+  status:          CourseStatus;
+  totalDuration:   number;
+  enrollmentCount: number;
+  publishedAt:     string | null;
+  createdAt:       string;
+  updatedAt:       string;
+}
+
+
+export interface CourseTutorDetailDTO extends CourseBasicDTO {
   modules: ModuleDTO[];
 }
 
-export interface PaginatedResult<T> {
-  data:        T[];
-  total:       number;
-  page:        number;
-  limit:       number;
-  totalPages:  number;
+/** Shape of GET /api/instructor/courses response */
+export interface TutorCoursesResponse {
+  courses: TutorCourseListItemDTO[];
+  pagination: {
+    page:       number;
+    limit:      number;
+    total:      number;
+    totalPages: number;
+  };
 }
 
-export interface ListPublicCoursesParams {
-  page?:      number;
-  limit?:     number;
-  search?:    string;
-  level?:     CourseLevel | '';
-  minPrice?:  number;
-  maxPrice?:  number;
-  tags?:      string[];
-  sortBy?:    'price' | 'createdAt' | 'title';
-  sortOrder?: 'asc' | 'desc';
+// Public DTOs
+
+export interface PublicCourseListItemDTO {
+  id:              string;
+  tutorId:         string;
+  title:           string;
+  subtitle:        string | null;
+  /** URL string (or null). */
+  thumbnail:       string | null;
+  category:        CourseCategory;
+  level:           CourseLevel;
+  language:        string;
+  price:           number;
+  currency:        string;
+  tags:            string[];
+  totalDuration:   number;
+  enrollmentCount: number;
+  publishedAt:     string | null;
 }
+
+export interface PublicChapterDTO {
+  id:       string;
+  title:    string;
+  order:    number;
+  type:     'video' | 'text';
+  duration: number;
+  isFree:   boolean;
+  /** Only populated for free chapters */
+  content:  string | null;
+  /** Only populated for free video chapters */
+  video:    VideoMetadataDTO | null;
+}
+
+export interface PublicLessonDTO {
+  id:          string;
+  title:       string;
+  description: string | null;
+  order:       number;
+  isPreview:   boolean;
+  duration:    number;
+  chapters:    PublicChapterDTO[];
+}
+
+export interface PublicModuleDTO {
+  id:          string;
+  title:       string;
+  description: string | null;
+  order:       number;
+  duration:    number;
+  lessons:     PublicLessonDTO[];
+}
+
+/** Returned by GET /api/courses/:courseId */
+export interface PublicCourseDetailDTO extends PublicCourseListItemDTO {
+  description: string;
+  modules:     PublicModuleDTO[];
+}
+
+/** Shape of GET /api/courses response */
+export interface PublicCoursesResponse {
+  courses: PublicCourseListItemDTO[];
+  pagination: {
+    page:       number;
+    limit:      number;
+    total:      number;
+    totalPages: number;
+  };
+}
+
+// Query params
 
 export interface ListTutorCoursesParams {
   page?:   number;
   limit?:  number;
+  /** Pass empty string or omit to fetch all statuses */
   status?: CourseStatus | '';
-  search?: string;
 }
+
+export interface ListPublicCoursesParams {
+  page?:     number;
+  limit?:    number;
+  search?:   string;
+  category?: CourseCategory | '';
+  level?:    CourseLevel | '';
+  language?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  sort?:     'newest' | 'oldest' | 'price_asc' | 'price_desc' | 'popular' | '';
+}
+
+// Request payloads
 
 export interface CreateCoursePayload {
   title:       string;
@@ -119,35 +228,30 @@ export interface UpdateCoursePayload {
   tags?:        string[];
 }
 
-export interface ThumbnailUploadUrlDTO {
-  uploadUrl:  string;  
-  key:        string;
-  publicUrl:  string;
-}
-
 export interface AddModulePayload {
-  title: string;
+  title:        string;
+  description?: string | null;
 }
 
 export interface UpdateModulePayload {
-  title: string;
+  title?:       string;
+  description?: string | null;
 }
 
-export interface ReorderModulesPayload {
-  /** Ordered array of module IDs representing the new sequence */
-  moduleIds: string[];
+export interface ReorderPayload {
+  orderedIds: string[];
 }
 
 export interface AddLessonPayload {
-  title: string;
+  title:        string;
+  description?: string | null;
+  isPreview?:   boolean;
 }
 
 export interface UpdateLessonPayload {
-  title: string;
-}
-
-export interface ReorderLessonsPayload {
-  lessonIds: string[];
+  title?:       string;
+  description?: string | null;
+  isPreview?:   boolean;
 }
 
 export interface AddChapterPayload {
@@ -166,17 +270,20 @@ export interface UpdateChapterPayload {
   duration?: number;
 }
 
-export interface ReorderChaptersPayload {
-  chapterIds: string[];
+// Video upload (presigned S3 flow)
+
+export interface GetVideoUploadUrlPayload {
+  filename: string;
+  mimeType: string;
+  size:     number;
 }
 
 export interface GetVideoUploadUrlDTO {
-  uploadUrl: string;   
-  key:       string;
-  expiresIn: number;   
+  uploadUrl: string;
+  s3Key:     string;
+  expiresIn: number;
 }
 
 export interface ConfirmVideoUploadPayload {
-  key:      string;
-  duration: number;    
+  duration: number;
 }

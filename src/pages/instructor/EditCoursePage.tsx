@@ -37,7 +37,7 @@ function validate(f: FormState): FormErrors {
   if (!f.level)                               e.level       = 'Level is required';
   if (!f.language.trim())                     e.language    = 'Language is required';
   const price = parseFloat(f.price);
-  if (isNaN(price) || price < 0)              e.price       = 'Price must be 0 or more';
+  if (isNaN(price) || price < 0)             e.price       = 'Price must be 0 or more';
   const tags = parseTags(f.tags);
   if (tags.length > 10)                       e.tags        = 'Cannot have more than 10 tags';
   else if (tags.some(t => t.length > 30))     e.tags        = 'Each tag cannot exceed 30 characters';
@@ -54,19 +54,18 @@ export default function EditCoursePage() {
   const [errors, setErrors] = useState<FormErrors>({});
 
   // Thumbnail state
-  const fileInputRef           = useRef<HTMLInputElement>(null);
-  const [thumbFile,  setThumbFile]  = useState<File | null>(null);
+  const fileInputRef              = useRef<HTMLInputElement>(null);
+  const [thumbFile,    setThumbFile]    = useState<File | null>(null);
   const [thumbPreview, setThumbPreview] = useState<string | null>(null);
   const [thumbLoading, setThumbLoading] = useState(false);
 
-  // ── Load course ────────────────────────────────────────────────────────────
+  // Load course
   const { data: course, isLoading, isError } = useQuery({
     queryKey: ['tutor-course', courseId],
     queryFn:  () => getMyCourse(courseId!),
     enabled:  !!courseId,
   });
 
-  // Pre-fill form once course data arrives
   useEffect(() => {
     if (!course) return;
     setForm({
@@ -86,7 +85,7 @@ export default function EditCoursePage() {
     if (errors[field]) setErrors(prev => ({ ...prev, [field]: undefined }));
   }
 
-  // ── Update metadata mutation ───────────────────────────────────────────────
+  // Update mutation
   const updateMutation = useMutation({
     mutationFn: (payload: UpdateCoursePayload) => updateCourse(courseId!, payload),
     onSuccess: () => {
@@ -116,7 +115,7 @@ export default function EditCoursePage() {
     });
   }
 
-  // ── Thumbnail handlers ─────────────────────────────────────────────────────
+  // Thumbnail handlers
   function handleThumbSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -128,9 +127,11 @@ export default function EditCoursePage() {
     if (!thumbFile || !courseId) return;
     setThumbLoading(true);
     try {
-      await uploadThumbnail(courseId, thumbFile);
+      // uploadThumbnail now returns the new URL string
+      const newUrl = await uploadThumbnail(courseId, thumbFile);
       notify('Thumbnail uploaded.', 'success');
       setThumbFile(null);
+      setThumbPreview(newUrl);  // show the confirmed URL immediately
       queryClient.invalidateQueries({ queryKey: ['tutor-course', courseId] });
       queryClient.invalidateQueries({ queryKey: ['tutor-courses'] });
     } catch (err: any) {
@@ -140,7 +141,7 @@ export default function EditCoursePage() {
     }
   }
 
-  // ── Render states ──────────────────────────────────────────────────────────
+  // Render states
   if (isLoading) {
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
@@ -168,8 +169,7 @@ export default function EditCoursePage() {
 
   const saving = updateMutation.isPending;
 
-  // Current thumbnail to display (staged preview takes priority)
-  const displayThumb = thumbPreview ?? course.thumbnail?.url ?? null;
+  const displayThumb = thumbPreview ?? course.thumbnail ?? null;
 
   return (
     <div className="mx-auto max-w-3xl px-6 py-12">
@@ -193,11 +193,10 @@ export default function EditCoursePage() {
         </div>
       </div>
 
-      {/* ── Thumbnail section ─────────────────────────────────────────────── */}
+      {/* Thumbnail─ */}
       <div className="mb-8 rounded-lg border border-[color:var(--color-border)] bg-white p-6">
         <h2 className="mb-4 text-base font-semibold">Thumbnail</h2>
         <div className="flex items-start gap-6">
-          {/* Preview */}
           <div className="h-32 w-52 flex-shrink-0 overflow-hidden rounded-md bg-gray-100">
             {displayThumb ? (
               <img src={displayThumb} alt="Thumbnail" className="h-full w-full object-cover" />
@@ -207,8 +206,6 @@ export default function EditCoursePage() {
               </div>
             )}
           </div>
-
-          {/* Controls */}
           <div className="flex flex-col gap-3">
             <p className="text-sm text-[color:var(--color-muted)]">
               Recommended: 1280×720px, JPG or PNG, under 2 MB.
@@ -241,14 +238,16 @@ export default function EditCoursePage() {
         </div>
       </div>
 
-      {/* ── Course info form ──────────────────────────────────────────────── */}
+      {/* Course details form */}
       <div className="rounded-lg border border-[color:var(--color-border)] bg-white p-6">
         <h2 className="mb-6 text-base font-semibold">Course Details</h2>
 
         <form onSubmit={handleSubmit} className="space-y-6">
 
           <div>
-            <label className="mb-1 block text-sm font-medium">Title <span className="text-red-500">*</span></label>
+            <label className="mb-1 block text-sm font-medium">
+              Title <span className="text-red-500">*</span>
+            </label>
             <input type="text" value={form.title} onChange={e => set('title', e.target.value)} disabled={saving}
               className={errors.title ? 'border-[color:var(--color-danger)]' : ''} />
             <FieldError message={errors.title} />
@@ -262,7 +261,9 @@ export default function EditCoursePage() {
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium">Description <span className="text-red-500">*</span></label>
+            <label className="mb-1 block text-sm font-medium">
+              Description <span className="text-red-500">*</span>
+            </label>
             <textarea rows={5} value={form.description} onChange={e => set('description', e.target.value)} disabled={saving}
               className={`w-full rounded-[var(--radius-md)] border px-3 py-2 text-sm resize-y ${
                 errors.description ? 'border-[color:var(--color-danger)]' : 'border-[color:var(--color-border)]'}`} />
@@ -271,7 +272,9 @@ export default function EditCoursePage() {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="mb-1 block text-sm font-medium">Category <span className="text-red-500">*</span></label>
+              <label className="mb-1 block text-sm font-medium">
+                Category <span className="text-red-500">*</span>
+              </label>
               <select value={form.category} onChange={e => set('category', e.target.value)} disabled={saving}
                 className={`w-full rounded-[var(--radius-md)] border px-3 py-2 text-sm bg-white ${
                   errors.category ? 'border-[color:var(--color-danger)]' : 'border-[color:var(--color-border)]'}`}>
@@ -280,7 +283,9 @@ export default function EditCoursePage() {
               <FieldError message={errors.category} />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium">Level <span className="text-red-500">*</span></label>
+              <label className="mb-1 block text-sm font-medium">
+                Level <span className="text-red-500">*</span>
+              </label>
               <select value={form.level} onChange={e => set('level', e.target.value)} disabled={saving}
                 className={`w-full rounded-[var(--radius-md)] border px-3 py-2 text-sm bg-white ${
                   errors.level ? 'border-[color:var(--color-danger)]' : 'border-[color:var(--color-border)]'}`}>
@@ -292,7 +297,9 @@ export default function EditCoursePage() {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="mb-1 block text-sm font-medium">Language <span className="text-red-500">*</span></label>
+              <label className="mb-1 block text-sm font-medium">
+                Language <span className="text-red-500">*</span>
+              </label>
               <input type="text" value={form.language} onChange={e => set('language', e.target.value)} disabled={saving}
                 className={errors.language ? 'border-[color:var(--color-danger)]' : ''} />
               <FieldError message={errors.language} />

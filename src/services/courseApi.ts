@@ -1,196 +1,158 @@
-// src/services/courseApi.ts
 import { apiClient } from '../lib/axios';
 import type {
-  PaginatedResult,
-  CourseDetailDTO,
-  CourseListItemDTO,
-  ListPublicCoursesParams,
+  TutorCoursesResponse,
+  CourseTutorDetailDTO,
+  CourseBasicDTO,
+  PublicCoursesResponse,
+  PublicCourseDetailDTO,
+  ModuleDTO,
+  LessonDTO,
+  ChapterDTO,
   ListTutorCoursesParams,
+  ListPublicCoursesParams,
   CreateCoursePayload,
   UpdateCoursePayload,
   AddModulePayload,
   UpdateModulePayload,
-  ReorderModulesPayload,
+  ReorderPayload,
   AddLessonPayload,
   UpdateLessonPayload,
-  ReorderLessonsPayload,
   AddChapterPayload,
   UpdateChapterPayload,
-  ReorderChaptersPayload,
+  GetVideoUploadUrlPayload,
   GetVideoUploadUrlDTO,
   ConfirmVideoUploadPayload,
 } from '../types/course.types';
 
-// ---------------------------------------------------------------------------
-// Server response envelope: { success: boolean; data: T; message?: string }
-// Every function does:  const { data } = await apiClient.xxx(...)   ← axios unwrap
-//                       return data.data                             ← envelope unwrap
-// ---------------------------------------------------------------------------
-
-// =============================================================================
-// PUBLIC
-// Server: GET /courses/          (no /public prefix)
-// Server: GET /courses/:courseId
-// =============================================================================
 
 export async function listPublicCourses(
   params: ListPublicCoursesParams = {}
-): Promise<PaginatedResult<CourseListItemDTO>> {
-  const { data } = await apiClient.get('/courses', { params });
-  return data.data;
+): Promise<PublicCoursesResponse> {
+    const clean: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(params)) {
+    if (v !== '' && v !== undefined && v !== null) clean[k] = v;
+  }
+  const { data } = await apiClient.get('/api/courses', { params: clean });
+    return { courses: data.courses, pagination: data.pagination };
 }
 
-export async function getPublicCourse(courseId: string): Promise<CourseDetailDTO> {
-  const { data } = await apiClient.get(`/courses/${courseId}`);
-  return data.data;
+export async function getPublicCourse(courseId: string): Promise<PublicCourseDetailDTO> {
+  const { data } = await apiClient.get(`/api/courses/${courseId}`);
+    return data.course;
 }
 
-// =============================================================================
-// TUTOR — COURSE CRUD
-// Server: GET    /courses/my
-// Server: GET    /courses/my/:courseId
-// Server: POST   /courses           (create — no /my prefix on this one)
-// Server: PUT    /courses/my/:courseId
-// Server: DELETE /courses/my/:courseId
-// =============================================================================
 
 export async function getMyCourses(
   params: ListTutorCoursesParams = {}
-): Promise<PaginatedResult<CourseListItemDTO>> {
-  const { data } = await apiClient.get('/courses/my', { params });
-  return data.data ?? { data: [], total: 0, page: 1, limit: 9, totalPages: 0 };
+): Promise<TutorCoursesResponse> {
+    const clean: Record<string, unknown> = {};
+  if (params.page)   clean.page  = params.page;
+  if (params.limit)  clean.limit = params.limit;
+  if (params.status) clean.status = params.status;
+
+  const { data } = await apiClient.get('/api/instructor/courses', { params: clean });
+    return { courses: data.courses, pagination: data.pagination };
 }
 
-export async function getMyCourse(courseId: string): Promise<CourseDetailDTO> {
-  const { data } = await apiClient.get(`/courses/my/${courseId}`);
-  return data.data;
+export async function getMyCourse(courseId: string): Promise<CourseTutorDetailDTO> {
+  const { data } = await apiClient.get(`/api/instructor/courses/${courseId}`);
+    return data.course;
 }
 
-export async function createCourse(
-  payload: CreateCoursePayload
-): Promise<CourseDetailDTO> {
-  const { data } = await apiClient.post('/courses', payload);
-  return data.data;
+export async function createCourse(payload: CreateCoursePayload): Promise<CourseBasicDTO> {
+  const { data } = await apiClient.post('/api/instructor/courses', payload);
+    return data.course;
 }
 
 export async function updateCourse(
   courseId: string,
   payload: UpdateCoursePayload
-): Promise<CourseDetailDTO> {
-  const { data } = await apiClient.put(`/courses/my/${courseId}`, payload);
-  return data.data;
+): Promise<CourseBasicDTO> {
+  const { data } = await apiClient.put(`/api/instructor/courses/${courseId}`, payload);
+  return data.course;
 }
 
 export async function deleteCourse(courseId: string): Promise<void> {
-  await apiClient.delete(`/courses/my/${courseId}`);
+  await apiClient.delete(`/api/instructor/courses/${courseId}`);
 }
 
-// =============================================================================
-// TUTOR — LIFECYCLE
-// Server: POST /courses/my/:courseId/publish
-// Server: POST /courses/my/:courseId/unpublish
-// Server: POST /courses/my/:courseId/archive
-// =============================================================================
 
-export async function publishCourse(courseId: string): Promise<CourseDetailDTO> {
-  const { data } = await apiClient.post(`/courses/my/${courseId}/publish`);
-  return data.data;
-}
-
-export async function unpublishCourse(courseId: string): Promise<CourseDetailDTO> {
-  const { data } = await apiClient.post(`/courses/my/${courseId}/unpublish`);
-  return data.data;
-}
-
-export async function archiveCourse(courseId: string): Promise<CourseDetailDTO> {
-  const { data } = await apiClient.post(`/courses/my/${courseId}/archive`);
-  return data.data;
-}
-
-// =============================================================================
-// TUTOR — THUMBNAIL
-// Server: POST /courses/my/:courseId/thumbnail  (multipart/form-data)
-// No presigned URL flow — server handles S3 internally.
-// =============================================================================
-
-export async function uploadThumbnail(
-  courseId: string,
-  file: File
-): Promise<void> {
+export async function uploadThumbnail(courseId: string, file: File): Promise<string> {
   const formData = new FormData();
   formData.append('thumbnail', file);
-  await apiClient.post(`/courses/my/${courseId}/thumbnail`, formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-  });
+  const { data } = await apiClient.post(
+    `/api/instructor/courses/${courseId}/thumbnail`,
+    formData,
+    { headers: { 'Content-Type': 'multipart/form-data' } }
+  );
+    return data.thumbnailUrl;
 }
 
-// =============================================================================
-// TUTOR — MODULES
-// Server: POST /courses/my/:courseId/modules
-// Server: PUT  /courses/my/:courseId/modules/reorder   ← before /:moduleId
-// Server: PUT  /courses/my/:courseId/modules/:moduleId
-// Server: DELETE /courses/my/:courseId/modules/:moduleId
-// =============================================================================
+
+export async function publishCourse(courseId: string): Promise<CourseBasicDTO> {
+  const { data } = await apiClient.post(`/api/instructor/courses/${courseId}/publish`);
+  return data.course;
+}
+
+export async function unpublishCourse(courseId: string): Promise<CourseBasicDTO> {
+  const { data } = await apiClient.post(`/api/instructor/courses/${courseId}/unpublish`);
+  return data.course;
+}
+
+export async function archiveCourse(courseId: string): Promise<CourseBasicDTO> {
+  const { data } = await apiClient.post(`/api/instructor/courses/${courseId}/archive`);
+  return data.course;
+}
+
 
 export async function addModule(
   courseId: string,
   payload: AddModulePayload
-): Promise<CourseDetailDTO> {
-  const { data } = await apiClient.post(`/courses/my/${courseId}/modules`, payload);
-  return data.data;
+): Promise<ModuleDTO> {
+  const { data } = await apiClient.post(
+    `/api/instructor/courses/${courseId}/modules`,
+    payload
+  );
+    return data.module;
 }
 
 export async function updateModule(
   courseId: string,
   moduleId: string,
   payload: UpdateModulePayload
-): Promise<CourseDetailDTO> {
+): Promise<ModuleDTO> {
   const { data } = await apiClient.put(
-    `/courses/my/${courseId}/modules/${moduleId}`,
+    `/api/instructor/courses/${courseId}/modules/${moduleId}`,
     payload
   );
-  return data.data;
+    return data.module;
 }
 
-export async function removeModule(
-  courseId: string,
-  moduleId: string
-): Promise<CourseDetailDTO> {
-  const { data } = await apiClient.delete(
-    `/courses/my/${courseId}/modules/${moduleId}`
-  );
-  return data.data;
+export async function removeModule(courseId: string, moduleId: string): Promise<void> {
+  await apiClient.delete(`/api/instructor/courses/${courseId}/modules/${moduleId}`);
 }
 
 export async function reorderModules(
   courseId: string,
-  payload: ReorderModulesPayload
-): Promise<CourseDetailDTO> {
-  const { data } = await apiClient.put(
-    `/courses/my/${courseId}/modules/reorder`,
+  payload: ReorderPayload
+): Promise<void> {
+  await apiClient.put(
+    `/api/instructor/courses/${courseId}/modules/reorder`,
     payload
   );
-  return data.data;
 }
 
-// =============================================================================
-// TUTOR — LESSONS
-// Server: POST   /courses/my/:courseId/modules/:moduleId/lessons
-// Server: PUT    /courses/my/:courseId/modules/:moduleId/lessons/reorder
-// Server: PUT    /courses/my/:courseId/modules/:moduleId/lessons/:lessonId
-// Server: DELETE /courses/my/:courseId/modules/:moduleId/lessons/:lessonId
-// =============================================================================
 
 export async function addLesson(
   courseId: string,
   moduleId: string,
   payload: AddLessonPayload
-): Promise<CourseDetailDTO> {
+): Promise<LessonDTO> {
   const { data } = await apiClient.post(
-    `/courses/my/${courseId}/modules/${moduleId}/lessons`,
+    `/api/instructor/courses/${courseId}/modules/${moduleId}/lessons`,
     payload
   );
-  return data.data;
+    return data.lesson;
 }
 
 export async function updateLesson(
@@ -198,56 +160,47 @@ export async function updateLesson(
   moduleId: string,
   lessonId: string,
   payload: UpdateLessonPayload
-): Promise<CourseDetailDTO> {
+): Promise<LessonDTO> {
   const { data } = await apiClient.put(
-    `/courses/my/${courseId}/modules/${moduleId}/lessons/${lessonId}`,
+    `/api/instructor/courses/${courseId}/modules/${moduleId}/lessons/${lessonId}`,
     payload
   );
-  return data.data;
+  return data.lesson;
 }
 
 export async function removeLesson(
   courseId: string,
   moduleId: string,
   lessonId: string
-): Promise<CourseDetailDTO> {
-  const { data } = await apiClient.delete(
-    `/courses/my/${courseId}/modules/${moduleId}/lessons/${lessonId}`
+): Promise<void> {
+  await apiClient.delete(
+    `/api/instructor/courses/${courseId}/modules/${moduleId}/lessons/${lessonId}`
   );
-  return data.data;
 }
 
 export async function reorderLessons(
   courseId: string,
   moduleId: string,
-  payload: ReorderLessonsPayload
-): Promise<CourseDetailDTO> {
-  const { data } = await apiClient.put(
-    `/courses/my/${courseId}/modules/${moduleId}/lessons/reorder`,
+  payload: ReorderPayload
+): Promise<void> {
+  await apiClient.put(
+    `/api/instructor/courses/${courseId}/modules/${moduleId}/lessons/reorder`,
     payload
   );
-  return data.data;
 }
 
-// =============================================================================
-// TUTOR — CHAPTERS
-// Server: POST   /courses/my/:courseId/modules/:moduleId/lessons/:lessonId/chapters
-// Server: PUT    /courses/my/.../chapters/reorder   ← before /:chapterId
-// Server: PUT    /courses/my/.../chapters/:chapterId
-// Server: DELETE /courses/my/.../chapters/:chapterId
-// =============================================================================
 
 export async function addChapter(
   courseId: string,
   moduleId: string,
   lessonId: string,
   payload: AddChapterPayload
-): Promise<CourseDetailDTO> {
+): Promise<ChapterDTO> {
   const { data } = await apiClient.post(
-    `/courses/my/${courseId}/modules/${moduleId}/lessons/${lessonId}/chapters`,
+    `/api/instructor/courses/${courseId}/modules/${moduleId}/lessons/${lessonId}/chapters`,
     payload
   );
-  return data.data;
+    return data.chapter;
 }
 
 export async function updateChapter(
@@ -256,12 +209,12 @@ export async function updateChapter(
   lessonId: string,
   chapterId: string,
   payload: UpdateChapterPayload
-): Promise<CourseDetailDTO> {
+): Promise<ChapterDTO> {
   const { data } = await apiClient.put(
-    `/courses/my/${courseId}/modules/${moduleId}/lessons/${lessonId}/chapters/${chapterId}`,
+    `/api/instructor/courses/${courseId}/modules/${moduleId}/lessons/${lessonId}/chapters/${chapterId}`,
     payload
   );
-  return data.data;
+  return data.chapter;
 }
 
 export async function removeChapter(
@@ -269,51 +222,38 @@ export async function removeChapter(
   moduleId: string,
   lessonId: string,
   chapterId: string
-): Promise<CourseDetailDTO> {
-  const { data } = await apiClient.delete(
-    `/courses/my/${courseId}/modules/${moduleId}/lessons/${lessonId}/chapters/${chapterId}`
+): Promise<void> {
+  await apiClient.delete(
+    `/api/instructor/courses/${courseId}/modules/${moduleId}/lessons/${lessonId}/chapters/${chapterId}`
   );
-  return data.data;
 }
 
 export async function reorderChapters(
   courseId: string,
   moduleId: string,
   lessonId: string,
-  payload: ReorderChaptersPayload
-): Promise<CourseDetailDTO> {
-  const { data } = await apiClient.put(
-    `/courses/my/${courseId}/modules/${moduleId}/lessons/${lessonId}/chapters/reorder`,
+  payload: ReorderPayload
+): Promise<void> {
+  await apiClient.put(
+    `/api/instructor/courses/${courseId}/modules/${moduleId}/lessons/${lessonId}/chapters/reorder`,
     payload
   );
-  return data.data;
 }
 
-// =============================================================================
-// TUTOR — VIDEO UPLOAD FLOW
-// Server: POST /courses/my/.../chapters/:chapterId/video-upload-url
-// Server: POST /courses/my/.../chapters/:chapterId/confirm-upload
-// =============================================================================
 
-/**
- * Step 1 — request a presigned S3 PUT URL from the server.
- */
 export async function getVideoUploadUrl(
-  courseId: string,
-  moduleId: string,
-  lessonId: string,
-  chapterId: string
+  courseId:  string,
+  moduleId:  string,
+  lessonId:  string,
+  chapterId: string,
+  payload:   GetVideoUploadUrlPayload
 ): Promise<GetVideoUploadUrlDTO> {
   const { data } = await apiClient.post(
-    `/courses/my/${courseId}/modules/${moduleId}/lessons/${lessonId}/chapters/${chapterId}/video-upload-url`
-  );
-  return data.data;
+    `/api/instructor/courses/${courseId}/modules/${moduleId}/lessons/${lessonId}/chapters/${chapterId}/video-upload-url`,
+    payload     );
+    return { uploadUrl: data.uploadUrl, s3Key: data.s3Key, expiresIn: data.expiresIn };
 }
 
-/**
- * Step 2 — upload the raw file directly to S3 via the presigned URL.
- * XHR-based so the caller can receive live upload progress.
- */
 export function uploadVideoToS3(
   presignedUrl: string,
   file: File,
@@ -322,7 +262,7 @@ export function uploadVideoToS3(
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.open('PUT', presignedUrl);
-    xhr.setRequestHeader('Content-Type', file.type);
+        xhr.setRequestHeader('Content-Type', file.type);
 
     if (onProgress) {
       xhr.upload.onprogress = (e) => {
@@ -335,27 +275,22 @@ export function uploadVideoToS3(
     xhr.onload = () =>
       xhr.status >= 200 && xhr.status < 300
         ? resolve()
-        : reject(new Error(`S3 upload failed: ${xhr.status}`));
-    xhr.onerror = () => reject(new Error('S3 upload network error'));
+        : reject(new Error(`S3 upload failed: ${xhr.status} ${xhr.statusText}`));
+
+    xhr.onerror = () => reject(new Error('S3 upload: network error'));
     xhr.send(file);
   });
 }
 
-/**
- * Step 3 — notify the server that the S3 upload completed.
- * Persists the key + measured duration on the chapter document.
- * Note: server path is /confirm-upload (not /confirm-video-upload).
- */
 export async function confirmVideoUpload(
-  courseId: string,
-  moduleId: string,
-  lessonId: string,
+  courseId:  string,
+  moduleId:  string,
+  lessonId:  string,
   chapterId: string,
-  payload: ConfirmVideoUploadPayload
-): Promise<CourseDetailDTO> {
+  payload:   ConfirmVideoUploadPayload   ): Promise<ChapterDTO> {
   const { data } = await apiClient.post(
-    `/courses/my/${courseId}/modules/${moduleId}/lessons/${lessonId}/chapters/${chapterId}/confirm-upload`,
+    `/api/instructor/courses/${courseId}/modules/${moduleId}/lessons/${lessonId}/chapters/${chapterId}/confirm-upload`,
     payload
   );
-  return data.data;
+    return data.chapter;
 }

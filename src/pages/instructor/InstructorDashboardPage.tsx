@@ -1,10 +1,15 @@
-// src/pages/tutor/TutorDashboardPage.tsx
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getMyCourses, publishCourse, unpublishCourse, archiveCourse, deleteCourse } from '../../services/courseApi';
+import {
+  getMyCourses,
+  publishCourse,
+  unpublishCourse,
+  archiveCourse,
+  deleteCourse,
+} from '../../services/courseApi';
 import { CourseStatus } from '../../types/course.types';
-import type { CourseStatus as CourseStatusType } from '../../types/course.types';
+import type { CourseStatus as CourseStatusType, TutorCourseListItemDTO } from '../../types/course.types';
 import { useNotify } from '../../notifications/useNotify';
 import InstructorCourseCard from '../../components/course/InstructorCourseCard';
 
@@ -20,6 +25,7 @@ const TABS: { label: string; value: FilterTab }[] = [
 const LIMIT = 9;
 
 // Delete confirmation modal
+
 interface DeleteModalProps {
   courseTitle: string;
   onConfirm: () => void;
@@ -54,7 +60,7 @@ function DeleteModal({ courseTitle, onConfirm, onCancel, isLoading }: DeleteModa
             {isLoading ? (
               <>
                 <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                Deleting...
+                Deleting…
               </>
             ) : 'Delete'}
           </button>
@@ -63,6 +69,8 @@ function DeleteModal({ courseTitle, onConfirm, onCancel, isLoading }: DeleteModa
     </div>
   );
 }
+
+// Page 
 
 export default function InstructorDashboardPage() {
   const navigate    = useNavigate();
@@ -73,11 +81,12 @@ export default function InstructorDashboardPage() {
   const [page, setPage]           = useState(1);
   const [pendingDelete, setPendingDelete] = useState<{ id: string; title: string } | null>(null);
 
-  const statusParam = activeTab === 'all' ? '' : activeTab;
+  // 'all' → omit status so the server returns every status
+  const statusParam = activeTab === 'all' ? undefined : activeTab;
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['tutor-courses', { status: statusParam, page }],
-    queryFn: () => getMyCourses({ status: statusParam as CourseStatusType | '', page, limit: LIMIT }),
+    queryKey: ['tutor-courses', { status: statusParam ?? 'all', page }],
+    queryFn:  () => getMyCourses({ status: statusParam, page, limit: LIMIT }),
   });
 
   function invalidate() {
@@ -123,13 +132,19 @@ export default function InstructorDashboardPage() {
     setPage(1);
   }
 
+  // getMyCourses now returns { courses, pagination }
+  const courses    = data?.courses    ?? [];
+  const totalPages = data?.pagination?.totalPages ?? 1;
+
   return (
     <div className="mx-auto max-w-7xl px-6 py-8">
 
       <div className="mb-8 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold">My Courses</h1>
-          <p className="mt-1 text-sm text-[color:var(--color-muted)]">Manage and publish your course library.</p>
+          <p className="mt-1 text-sm text-[color:var(--color-muted)]">
+            Manage and publish your course library.
+          </p>
         </div>
         <button
           onClick={() => navigate('/instructor/courses/new')}
@@ -139,6 +154,7 @@ export default function InstructorDashboardPage() {
         </button>
       </div>
 
+      {/*  Tabs  */}
       <div className="mb-8 border-b border-gray-200">
         <nav className="flex gap-6">
           {TABS.map(({ label, value }) => (
@@ -155,12 +171,14 @@ export default function InstructorDashboardPage() {
         </nav>
       </div>
 
+      {/*  Loading  */}
       {isLoading && (
         <div className="flex justify-center py-16">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[color:var(--color-primary)]" />
         </div>
       )}
 
+      {/*  Error  */}
       {isError && (
         <div className="rounded-lg border border-red-200 bg-red-50 p-6">
           <p className="font-medium text-red-900">Failed to load courses</p>
@@ -168,10 +186,13 @@ export default function InstructorDashboardPage() {
         </div>
       )}
 
-      {!isLoading && !isError && data?.data.length === 0 && (
+      {/*  Empty  */}
+      {!isLoading && !isError && courses.length === 0 && (
         <div className="rounded-lg border border-[color:var(--color-border)] bg-gray-50 py-20 text-center">
           <p className="text-gray-500">
-            {activeTab === 'all' ? "You haven't created any courses yet." : `No ${activeTab} courses.`}
+            {activeTab === 'all'
+              ? "You haven't created any courses yet."
+              : `No ${activeTab} courses.`}
           </p>
           {activeTab === 'all' && (
             <button onClick={() => navigate('/instructor/courses/new')}
@@ -182,33 +203,40 @@ export default function InstructorDashboardPage() {
         </div>
       )}
 
-      {!isLoading && !isError && data && data.data.length > 0 && (
+      {/*  Grid  */}
+      {!isLoading && !isError && courses.length > 0 && (
         <>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {data.data.map(course => (
+            {courses.map((course: TutorCourseListItemDTO) => (
               <InstructorCourseCard
-                key={course._id}
+                key={course.id}
                 course={course}
                 isActioning={isActioning}
                 onPublish={publishMutation.mutate}
                 onUnpublish={unpublishMutation.mutate}
                 onArchive={archiveMutation.mutate}
-                onDelete={id => setPendingDelete({ id, title: course.title })}
+                onDelete={(id) => setPendingDelete({ id, title: course.title })}
               />
             ))}
           </div>
 
-          {data.totalPages > 1 && (
+          {totalPages > 1 && (
             <div className="mt-10 flex items-center justify-center gap-2">
-              <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
-                className="rounded-md border px-4 py-2 text-sm disabled:opacity-50 hover:bg-gray-50">
+              <button
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={page === 1}
+                className="rounded-md border px-4 py-2 text-sm disabled:opacity-50 hover:bg-gray-50"
+              >
                 Previous
               </button>
               <span className="text-sm text-[color:var(--color-muted)]">
-                Page {page} of {data.totalPages}
+                Page {page} of {totalPages}
               </span>
-              <button onClick={() => setPage(p => Math.min(data.totalPages, p + 1))} disabled={page === data.totalPages}
-                className="rounded-md border px-4 py-2 text-sm disabled:opacity-50 hover:bg-gray-50">
+              <button
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+                className="rounded-md border px-4 py-2 text-sm disabled:opacity-50 hover:bg-gray-50"
+              >
                 Next
               </button>
             </div>
@@ -216,6 +244,7 @@ export default function InstructorDashboardPage() {
         </>
       )}
 
+      {/*  Delete modal  */}
       {pendingDelete && (
         <DeleteModal
           courseTitle={pendingDelete.title}

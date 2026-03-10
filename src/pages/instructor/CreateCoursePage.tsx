@@ -43,7 +43,7 @@ function validate(f: FormState): FormErrors {
   if (!f.level)                               e.level       = 'Level is required';
   if (!f.language.trim())                     e.language    = 'Language is required';
   const price = parseFloat(f.price);
-  if (isNaN(price) || price < 0)              e.price       = 'Price must be 0 or more';
+  if (isNaN(price) || price < 0)             e.price       = 'Price must be 0 or more';
   const tags = parseTags(f.tags);
   if (tags.length > 10)                       e.tags        = 'Cannot have more than 10 tags';
   else if (tags.some(t => t.length > 30))     e.tags        = 'Each tag cannot exceed 30 characters';
@@ -65,7 +65,8 @@ export default function CreateCoursePage() {
     mutationFn: (payload: CreateCoursePayload) => createCourse(payload),
     onSuccess: (course) => {
       notify('Course created! You can now add content.', 'success');
-      navigate(`/instructor/courses/${course._id}/edit`);
+      // course is CourseBasicDTO — uses `id`, not `_id`
+      navigate(`/instructor/courses/${course.id}/edit`);
     },
     onError: (err: any) => {
       notify(err?.response?.data?.message ?? 'Failed to create course.', 'error');
