@@ -56,7 +56,7 @@ export default function LoginForm() {
       <div className="mb-6">
         <label className="block text-sm font-medium mb-2">Login as</label>
         <div className="grid grid-cols-3 gap-2">
-          {(['student', 'instructor', 'admin'] as RoleContext[]).map((r) => (
+          {(['student', 'instructor'] as RoleContext[]).map((r) => (
             <button
               key={r}
               type="button"

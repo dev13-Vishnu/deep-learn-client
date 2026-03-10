@@ -30,6 +30,7 @@ import { RequireInstructorState, RequireRole } from '../auth/guards';
 import HomePage from '../pages/home/HomePage';
 import ProfilePage from '../pages/profile/ProfilePage';
 import OAuthCallbackPage from '../auth/pages/OAuthCallbackPage';
+import AdminLoginPage from '../pages/admin/AdminLoginPage';
 
 
 
@@ -66,6 +67,14 @@ export default function AppRoutes() {
 
       <Route path="/verify-otp" element={<OtpVerification />} />
       <Route path="/reset-password" element={<ResetPassword />} />
+      <Route
+        path="/admin/login"
+        element={
+          <GuestRoute>
+            <AdminLoginPage />
+          </GuestRoute>
+        }
+      />
 
       {/* ----------------- App Layout ----------------- */}
       <Route element={<AppLayout />}>

@@ -16,7 +16,7 @@ export default function AdminRoute({ children }: Props) {
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/admin/login" replace />;
   }
 
   if (user?.role !== 2) {

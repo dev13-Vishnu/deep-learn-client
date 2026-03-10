@@ -2,17 +2,18 @@ import AdminLoginForm from './components/AdminLoginForm';
 
 export default function AdminLoginPage() {
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-white">
-      {/* Form panel */}
-      <div className="flex w-full items-center justify-center md:w-1/2">
-        <AdminLoginForm />
-      </div>
+    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
+      <div className="w-full max-w-md rounded-lg bg-white p-8 shadow">
+        <h1 className="text-2xl font-semibold text-center">
+          Admin Login
+        </h1>
 
-      {/* Decorative panel (hidden on small screens) */}
-      <div className="hidden md:flex md:w-1/2 items-center justify-center bg-[color:var(--color-primary)]">
-        <div className="text-center text-white px-10">
-          <h1 className="text-3xl font-bold">DeepLearn</h1>
-          <p className="mt-3 text-sm text-white/70">Administration Console</p>
+        <p className="mt-2 text-center text-sm text-gray-500">
+          Sign in with your admin credentials
+        </p>
+
+        <div className="mt-6">
+          <AdminLoginForm />
         </div>
       </div>
     </div>
