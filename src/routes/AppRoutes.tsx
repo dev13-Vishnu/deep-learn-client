@@ -17,16 +17,19 @@ import LandingPage from '../pages/landing/LandingPage';
 import InstructorApplyPage from '../pages/instructor/InstructorApplyPage';
 import InstructorStatusPage from '../pages/instructor/InstructorStatusPage';
 import InstructorDashboardPage from '../pages/instructor/InstructorDashboardPage';
+import CreateCoursePage from '../pages/instructor/CreateCoursePage';
+import EditCoursePage from '../pages/instructor/EditCoursePage';
+import ContentManagerPage from '../pages/instructor/ContentManagerPage';   
+
+import PublicCoursesPage from '../pages/courses/PublicCoursesPage';           
+import PublicCourseDetailPage from '../pages/courses/PublicCourseDetailPage'; 
 
 import AdminDashboardPage from '../pages/admin/AdminDashBoardPage';
 
-import { RequireInstructorState, RequireRole} from '../auth/guards';
+import { RequireInstructorState, RequireRole } from '../auth/guards';
 import HomePage from '../pages/home/HomePage';
 import ProfilePage from '../pages/profile/ProfilePage';
 import OAuthCallbackPage from '../auth/pages/OAuthCallbackPage';
-import CreateCoursePage from '../pages/instructor/CreateCoursePage';
-import EditCoursePage from '../pages/instructor/EditCoursePage';
-import ContentManagerPage from '../pages/instructor/ContentManagerPage';
 
 
 
@@ -69,8 +72,11 @@ export default function AppRoutes() {
         {/* Public */}
         <Route path="/" element={<LandingPage />} />
 
+        {/* Public course browsing — no auth required */}
+        <Route path="/courses" element={<PublicCoursesPage />} />
+        <Route path="/courses/:courseId" element={<PublicCourseDetailPage />} />
+
         {/* ----------------- Student Routes ----------------- */}
-        
         <Route
           path="/home"
           element={
@@ -127,7 +133,6 @@ export default function AppRoutes() {
           }
         />
 
-
         <Route
           path="/instructor/courses/new"
           element={
@@ -178,10 +183,8 @@ export default function AppRoutes() {
             </AdminRoute>
           }
         />
-      <Route path="/auth/callback" element={<OAuthCallbackPage />} />
+        <Route path="/auth/callback" element={<OAuthCallbackPage />} />
       </Route>
-
-
     </Routes>
   );
 }
