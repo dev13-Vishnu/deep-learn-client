@@ -144,7 +144,7 @@ export default function LoginForm() {
       <div className="flex gap-3">
         <button
           type="button"
-          onClick={() => handleOAuthLogin('google')}
+          onClick={() => handleOAuthLogin('google',role)}
           disabled={loading || oauthLoading}
           className="flex-1 border border-[color:var(--color-border)] bg-white py-2"
         >

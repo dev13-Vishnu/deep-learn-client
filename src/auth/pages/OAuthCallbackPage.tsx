@@ -7,18 +7,33 @@ import { roleContextStorage } from '../../storage/roleContext.storage';
 import { authApi } from '../../api/auth.api';
 import type { RoleContext } from '../../store/auth/authSlice';
 import { getAuthHomePath } from '../navigation/getAuthHomePath';
+import { OAUTH_INTENDED_ROLE_KEY } from '../hooks/useOAuth';
 
-function toRoleContext(role: any): RoleContext {
+function dbRoleToContext(role: any): RoleContext {
   if (role === 1 || role === 'instructor') return 'instructor';
-  if (role === 2 || role === 'admin') return 'admin';
+  if (role === 2 || role === 'admin')      return 'admin';
   return 'student';
+}
+
+function resolveRoleContext(actualDbRole: any): RoleContext {
+  const actual   = dbRoleToContext(actualDbRole);
+  const intended = sessionStorage.getItem(OAUTH_INTENDED_ROLE_KEY) as RoleContext | null;
+
+  sessionStorage.removeItem(OAUTH_INTENDED_ROLE_KEY);
+
+  if (!intended) return actual;
+
+  if (intended === 'instructor' && actual !== 'instructor') return actual;
+  if (intended === 'admin'      && actual !== 'admin')      return actual;
+
+  return intended;
 }
 
 export default function OAuthCallbackPage() {
   const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
-  const dispatch = useAppDispatch();
-  const processed = useRef(false);
+  const navigate       = useNavigate();
+  const dispatch       = useAppDispatch();
+  const processed      = useRef(false);
 
   useEffect(() => {
     if (processed.current) return;
@@ -38,7 +53,7 @@ export default function OAuthCallbackPage() {
       .then((response) => {
         const userData = response.data;
 
-        const roleContext = toRoleContext(userData.role);
+        const roleContext = resolveRoleContext(userData.role);
 
         roleContextStorage.set(roleContext);
         dispatch(setFullAuth({ user: userData, roleContext }));
@@ -54,6 +69,7 @@ export default function OAuthCallbackPage() {
       .catch((error) => {
         console.error('Failed to fetch user after OAuth:', error);
         tokenStorage.clear();
+        sessionStorage.removeItem(OAUTH_INTENDED_ROLE_KEY);
         navigate('/login?error=oauth_invalid', { replace: true });
       });
   }, [searchParams, navigate, dispatch]);
