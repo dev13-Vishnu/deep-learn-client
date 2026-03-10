@@ -17,7 +17,6 @@ export type CourseCategory =
   | 'development' | 'design'    | 'business' | 'marketing'
   | 'photography' | 'music'     | 'health'   | 'other';
 
-// Shared nested DTOs (used by both tutor and public views)
 
 export interface VideoMetadataDTO {
   s3Key:      string;
@@ -25,7 +24,7 @@ export interface VideoMetadataDTO {
   size:       number;
   mimeType:   string;
   duration:   number;
-  status:     'uploading' | 'ready' | 'failed';
+  status:     'pending' | 'processing' | 'ready' | 'failed';
   uploadedAt: string;
 }
 
@@ -34,8 +33,8 @@ export interface ChapterDTO {
   title:    string;
   order:    number;
   type:     'video' | 'text';
-  duration: number;
   isFree:   boolean;
+  duration: number;
   content:  string | null;
   video:    VideoMetadataDTO | null;
 }
@@ -59,11 +58,9 @@ export interface ModuleDTO {
   lessons:     LessonDTO[];
 }
 
-// Tutor / Instructor DTOs
 export interface TutorCourseListItemDTO {
   id:              string;
   title:           string;
-  /** URL string (or null). NOT a { url, key } object. */
   thumbnail:       string | null;
   status:          CourseStatus;
   level:           CourseLevel;
@@ -74,14 +71,12 @@ export interface TutorCourseListItemDTO {
   publishedAt:     string | null;
 }
 
-
 export interface CourseBasicDTO {
   id:              string;
   tutorId:         string;
   title:           string;
   subtitle:        string | null;
   description:     string;
-  /** URL string (or null). */
   thumbnail:       string | null;
   category:        CourseCategory;
   level:           CourseLevel;
@@ -97,30 +92,18 @@ export interface CourseBasicDTO {
   updatedAt:       string;
 }
 
-
 export interface CourseTutorDetailDTO extends CourseBasicDTO {
   modules: ModuleDTO[];
 }
 
-/** Shape of GET /api/instructor/courses response */
-export interface TutorCoursesResponse {
-  courses: TutorCourseListItemDTO[];
-  pagination: {
-    page:       number;
-    limit:      number;
-    total:      number;
-    totalPages: number;
-  };
-}
-
-// Public DTOs
+export type CourseListItemDTO  = TutorCourseListItemDTO;
+export type CourseDetailDTO    = CourseTutorDetailDTO;
 
 export interface PublicCourseListItemDTO {
   id:              string;
   tutorId:         string;
   title:           string;
   subtitle:        string | null;
-  /** URL string (or null). */
   thumbnail:       string | null;
   category:        CourseCategory;
   level:           CourseLevel;
@@ -133,77 +116,44 @@ export interface PublicCourseListItemDTO {
   publishedAt:     string | null;
 }
 
-export interface PublicChapterDTO {
-  id:       string;
-  title:    string;
-  order:    number;
-  type:     'video' | 'text';
-  duration: number;
-  isFree:   boolean;
-  /** Only populated for free chapters */
-  content:  string | null;
-  /** Only populated for free video chapters */
-  video:    VideoMetadataDTO | null;
-}
-
-export interface PublicLessonDTO {
-  id:          string;
-  title:       string;
-  description: string | null;
-  order:       number;
-  isPreview:   boolean;
-  duration:    number;
-  chapters:    PublicChapterDTO[];
-}
-
-export interface PublicModuleDTO {
-  id:          string;
-  title:       string;
-  description: string | null;
-  order:       number;
-  duration:    number;
-  lessons:     PublicLessonDTO[];
-}
-
-/** Returned by GET /api/courses/:courseId */
 export interface PublicCourseDetailDTO extends PublicCourseListItemDTO {
   description: string;
-  modules:     PublicModuleDTO[];
+  modules:     ModuleDTO[];
 }
 
-/** Shape of GET /api/courses response */
-export interface PublicCoursesResponse {
-  courses: PublicCourseListItemDTO[];
-  pagination: {
-    page:       number;
-    limit:      number;
-    total:      number;
-    totalPages: number;
-  };
+
+export interface PaginationMeta {
+  page:       number;
+  limit:      number;
+  total:      number;
+  totalPages: number;
 }
 
-// Query params
-
-export interface ListTutorCoursesParams {
-  page?:   number;
-  limit?:  number;
-  /** Pass empty string or omit to fetch all statuses */
-  status?: CourseStatus | '';
+export interface PaginatedResult<T> {
+  courses:    T[];
+  pagination: PaginationMeta;
 }
+
 
 export interface ListPublicCoursesParams {
   page?:     number;
   limit?:    number;
   search?:   string;
-  category?: CourseCategory | '';
+  category?: CourseCategory;
   level?:    CourseLevel | '';
   language?: string;
   minPrice?: number;
   maxPrice?: number;
-  sort?:     'newest' | 'oldest' | 'price_asc' | 'price_desc' | 'popular' | '';
+  sort?:     'newest' | 'oldest' | 'price_asc' | 'price_desc' | 'popular';
 }
 
-// Request payloads
+export interface ListTutorCoursesParams {
+  page?:   number;
+  limit?:  number;
+  status?: CourseStatus | '';
+  search?: string;
+}
+
 
 export interface CreateCoursePayload {
   title:       string;
@@ -228,6 +178,7 @@ export interface UpdateCoursePayload {
   tags?:        string[];
 }
 
+
 export interface AddModulePayload {
   title:        string;
   description?: string | null;
@@ -238,9 +189,9 @@ export interface UpdateModulePayload {
   description?: string | null;
 }
 
-export interface ReorderPayload {
-  orderedIds: string[];
-}
+export interface ReorderModulesPayload {
+  orderedIds: string[];   }
+
 
 export interface AddLessonPayload {
   title:        string;
@@ -253,6 +204,10 @@ export interface UpdateLessonPayload {
   description?: string | null;
   isPreview?:   boolean;
 }
+
+export interface ReorderLessonsPayload {
+  orderedIds: string[];   }
+
 
 export interface AddChapterPayload {
   title:     string;
@@ -270,9 +225,11 @@ export interface UpdateChapterPayload {
   duration?: number;
 }
 
-// Video upload (presigned S3 flow)
+export interface ReorderChaptersPayload {
+  orderedIds: string[];   }
 
-export interface GetVideoUploadUrlPayload {
+
+export interface GetVideoUploadUrlRequestBody {
   filename: string;
   mimeType: string;
   size:     number;
@@ -280,10 +237,29 @@ export interface GetVideoUploadUrlPayload {
 
 export interface GetVideoUploadUrlDTO {
   uploadUrl: string;
-  s3Key:     string;
-  expiresIn: number;
+  s3Key:     string;      expiresIn: number;
 }
 
 export interface ConfirmVideoUploadPayload {
-  duration: number;
+  duration: number;     }
+
+
+export interface TutorCoursesResponse {
+  courses:    TutorCourseListItemDTO[];
+  pagination: PaginationMeta;
+}
+
+export interface PublicCoursesResponse {
+  courses:    PublicCourseListItemDTO[];
+  pagination: PaginationMeta;
+}
+
+export interface ReorderPayload {
+  orderedIds: string[];
+}
+
+export interface GetVideoUploadUrlPayload {
+  filename: string;
+  mimeType: string;
+  size:     number;
 }
