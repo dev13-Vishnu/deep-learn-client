@@ -12,7 +12,6 @@ export function toRoleContext(role: any): RoleContext {
   return 'student';
 }
 
-
 export interface AuthState {
   user: any | null;
   isAuthenticated: boolean;
@@ -29,7 +28,6 @@ const initialState: AuthState = {
   instructorState: null,
 };
 
-
 export const hydrateAuth = createAsyncThunk(
   'auth/hydrate',
   async (_, { rejectWithValue }) => {
@@ -40,7 +38,7 @@ export const hydrateAuth = createAsyncThunk(
 
     try {
       const res = await authApi.me();
-      const user = res.data.user;
+      const user = res.data;
       return {
         user,
         currentRole: storedRole ?? toRoleContext(user.role),
@@ -84,12 +82,11 @@ export const logoutUser = createAsyncThunk('auth/logout', async () => {
   try {
     await authApi.logout();
   } catch {
-    // ignore network errors
+    // ignore network errors on logout
   }
   tokenStorage.clear();
   roleContextStorage.clear();
 });
-
 
 const authSlice = createSlice({
   name: 'auth',
@@ -131,7 +128,7 @@ const authSlice = createSlice({
       state.user            = null;
       state.isAuthenticated = false;
       state.isHydrating     = false;
-      state.currentRole = null;
+      state.currentRole     = null;
       state.instructorState = null;
     });
 

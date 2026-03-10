@@ -8,11 +8,10 @@ import { authApi } from '../../api/auth.api';
 import type { RoleContext } from '../../store/auth/authSlice';
 import { getAuthHomePath } from '../navigation/getAuthHomePath';
 
-
 function toRoleContext(role: any): RoleContext {
   if (role === 1 || role === 'instructor') return 'instructor';
   if (role === 2 || role === 'admin') return 'admin';
-  return 'student'; 
+  return 'student';
 }
 
 export default function OAuthCallbackPage() {
@@ -37,7 +36,7 @@ export default function OAuthCallbackPage() {
 
     authApi.me()
       .then((response) => {
-        const userData = response.data.user;
+        const userData = response.data;
 
         const roleContext = toRoleContext(userData.role);
 
