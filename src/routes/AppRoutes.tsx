@@ -26,6 +26,7 @@ import ProfilePage from '../pages/profile/ProfilePage';
 import OAuthCallbackPage from '../auth/pages/OAuthCallbackPage';
 import CreateCoursePage from '../pages/instructor/CreateCoursePage';
 import EditCoursePage from '../pages/instructor/EditCoursePage';
+import ContentManagerPage from '../pages/instructor/ContentManagerPage';
 
 
 
@@ -147,6 +148,19 @@ export default function AppRoutes() {
               <RequireRole allowed={['instructor']}>
                 <RequireInstructorState>
                   <EditCoursePage />
+                </RequireInstructorState>
+              </RequireRole>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/instructor/courses/:courseId/content"
+          element={
+            <ProtectedRoute>
+              <RequireRole allowed={['instructor']}>
+                <RequireInstructorState>
+                  <ContentManagerPage />
                 </RequireInstructorState>
               </RequireRole>
             </ProtectedRoute>
