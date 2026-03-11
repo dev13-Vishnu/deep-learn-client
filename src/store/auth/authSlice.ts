@@ -38,7 +38,7 @@ export const hydrateAuth = createAsyncThunk(
 
     try {
       const res = await authApi.me();
-      const user = res.data;
+      const user = res.data.user;
       return {
         user,
         currentRole: storedRole ?? toRoleContext(user.role),
@@ -82,7 +82,6 @@ export const logoutUser = createAsyncThunk('auth/logout', async () => {
   try {
     await authApi.logout();
   } catch {
-    // ignore network errors on logout
   }
   tokenStorage.clear();
   roleContextStorage.clear();
